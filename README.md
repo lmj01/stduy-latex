@@ -1,2 +1,2 @@
-# stduy-latex
+# study-latex
 use latex to study
