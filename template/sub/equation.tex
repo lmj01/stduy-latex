@@ -1,0 +1,93 @@
+\section{补充}
+%多行公式--带编号
+\begin{gather}
+    a + b +c = b + a \\
+    1+2 = 2 + 1
+\end{gather}
+%多行公式--不带编号1
+\begin{gather*}
+    a + b = b + a \\
+    1+2 = 2 + 1
+\end{gather*}
+
+%多行公式--带编号2 \notag 阻止编号
+\begin{gather}
+a + b = b + a \notag \\
+1+2 = 2 + 1 \notag
+\end{gather}
+
+% 按&号对齐,--带编号
+\begin{align}
+    a+b &= b+a \\
+    1+2= & 2+1
+\end{align}
+
+% 按&号对齐,--不带编号
+\begin{align*}
+a+b &= b+a \\
+1+2 &=2+1
+\end{align*}
+
+%一个公式的多行排版--带编号
+\begin{equation}
+    \begin{split}
+    \cos 2x &= \cos^2 x - \sin^2x \\
+    &=2\cos^2x-1
+    \end{split} 
+\end{equation}
+
+%一个公式的多行排版--不带编号
+\begin{equation*}
+\begin{split}
+\cos 2x &= \cos^2 x - \sin^2x \\
+&=2\cos^2x-1
+\end{split} 
+\end{equation*}
+
+%case环境, text{}在数学模式中处理中文-带编号
+\begin{equation}
+    D(x)=\begin{cases}
+    1, & \text{如果} x \in \mathbb{Q};\\
+    0, & \text{如果} x \in \mathbb{R}\setminus\mathbb{Q}
+    \end{cases}
+\end{equation}
+
+%case环境, text{}在数学模式中处理中文-不带编号
+\begin{equation*}
+D(x)=\begin{cases}
+1, & \text{如果} x \in \mathbb{Q};\\
+0, & \text{如果} x \in \mathbb{R}\setminus\mathbb{Q}
+\end{cases}
+\end{equation*}
+
+\subsection{矩阵的省略号}
+%\dots 横向省略号
+%\vdots 竖向省略号
+%\ddots 斜向省略号
+\[
+A = \begin{bmatrix}
+a_{11} & \dots & a_{1n}\\
+\vdots& \ddots & \vdots \\
+0 & \dots & a_{nn}
+\end{bmatrix}_{n \times n}
+\]
+
+\subsection{行内小矩阵}
+复数可用矩阵
+\begin{math}
+    \left(
+    \begin{smallmatrix}
+    x & y \\ -y & x
+    \end{smallmatrix}
+    \right)
+\end{math}
+来表示
+
+\subsection{array环境}
+\[
+\begin{array}{c|c}
+1 & 2\\
+\hline
+0　& 1
+\end{array}
+\]

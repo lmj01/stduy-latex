@@ -1,0 +1,102 @@
+%%% renderer.tex
+
+\documentclass[UTF8]{article}
+% 目录
+\usepackage[titles]{tocloft}
+% 引入中文
+\usepackage{ctex} 
+% 超链接
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{url}
+% 引用
+\usepackage{cite}
+%\usepackage{natbib}
+% 图片
+\usepackage{graphicx}
+% 数学
+% 矩阵
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{arydshln}
+% 嵌入代码
+\usepackage{listings}
+
+\renewcommand\thesection{\arabic{section}}
+%\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+
+% 文档开始
+\begin{document}
+%-----使用封面代替
+%\title{renderer-title}
+%\maketitle
+%-----封面
+\begin{center}
+    \quad \\
+    \vspace{3cm}
+    \hspace{1cm}\Huge{Renderer渲染器} \\
+    \small{关于渲染器知识的整理} \\
+    \vspace{1cm}
+    \hspace{1cm}\Large{李美杰} \\
+    \vspace{0.5cm}
+    \hspace{1cm}\Large{2019.9.13}
+    \clearpage
+\end{center}
+%-----
+
+%-----留白
+\thispagestyle{empty}
+\clearpage
+%-----
+
+%-----目录
+\tableofcontents
+\clearpage
+%-----
+
+% 代码区域样式
+\lstset{
+    language=C,
+    numbers=left,
+    frame=box
+}
+
+%-----正文
+\input{subpart/rasterize.lighting.tex}
+
+\input{subpart/algorithm.tex}
+
+% 线性变换
+\input{subpart/linear.transform.tex}
+
+\clearpage
+\section{现状}
+sss ss 
+\subsection{软渲染}
+
+
+\subsection{硬渲染}
+
+\section{OpenGL}
+
+\clearpage
+\section{Vulkan}
+vulkan是控制GPU设备的API，相比OpenGL，由OpenGL驱动提供的功能都需要自己实现，包括，同步，进度，内存管理等。
+所以vulkan是适合大型复杂的图形渲染，定制性要求很高，OpenGL提供不了的功能。
+
+
+%-----其他
+\clearpage
+\section{附录}
+主要引用的文章以下：
+\cite{RAPI}
+\cite{Renderer}
+\cite{FoCG2Ed} 图形学基础第二版
+%-----
+
+%-----参考文档
+\bibliographystyle{plain}
+\bibliography{renderer.bib}
+%-----
+
+\end{document}

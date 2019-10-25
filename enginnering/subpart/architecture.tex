@@ -1,0 +1,138 @@
+\clearpage
+\part{Software Architecture}
+
+\section{总思想}
+软件架构是软件发展的必然之路，从最初开始的简单计算，花费那么大的精力来做计算，但是都是一步步来验证计算，
+软件分层思想是软件发展的基础思想，这样就能保证在之前的基础上进行替换改进，能看到好的软件架构是能保证很多错误，
+避免工程上的实现。
+
+
+\section{网页开发}
+
+\subsection{前后端分离}
+前后端分离是发展趋势产生的，新业务发展，如3D，VR，Image，Computing，webGL等的产生，同时服务器面对的数据也是
+几何级增加，为减少服务器方面的压力，同时利用终端设备的计算力。
+
+前后端分离的好处在于各种业务独立发展，后端以稳定，性能，安全，存储等业务为核心，强调稳定，承受能力，数据处理与
+环境干净；而前端注重效果，数据渲染等。
+
+前后端分离后，平台无关化得到支持，网页，移动断，手机，LOT等，同时对团队更好，耦合性更低。随着与硬件无关的编程语言
+发展迅速，如WebAssembly，Rust等必然产生前后端分离的需求，把服务器的压力全部限制在数据提供和反馈以及验证上，其他部分
+都可放在前端。
+
+\subsection{RESTful}
+REST是Representational State Transfer的缩写，是目前互联网软件架构，它具备结构清晰，符合标准，易于扩展。
+REST这个词是Roy Thomas Fielding在他2000博士论文中提出的。在前后端分离的基础上，前后端的交互只体现在API-server
+上，即前后端只通过API来传输请求数据，只处理有效数据。
+
+
+\section{工程方法}
+
+\subsection{软件分层}
+分层这个概念，是在整个计算机体系中是非常显而易见的的，这样保证每个阶段的发展是独立的，比如编程语言发展
+肯定快于CPU的发展，必须抽象隔离开，每一层都在下一层的基础上发展，又同时为上一层服务。
+
+\subsubsection{模块化}
+工程方案小而美不是指代码量少，而是指规则，用最少最简单明了的规则制定出最容易遵守，最容易理解的
+开发规范或工具，分而治之是软件工程中的重要思想，而模块化是最具体的方案。
+
+\textbf{前端是一种技术问题较少，工程问题较多的软件开发领域，如大体量，多功能，多页面，多状态，多系统；
+大规模：多人甚至多团队合作开发；高性能：CDN部署，缓存控制，同步异步加载等}
+
+\subsubsection{组件}
+component，是一个很泛的概念，就是软件复用的意思
+
+\subsubsection{插件}
+插件是一个很泛的概念，在软硬件中都存在的概念，这里只分析软件中的概念。
+
+\textbf{插件与宿主程序的依赖关系}
+\begin{itemize}
+    \item {由外而内：内部需要其他模块，如ActiveX，Plugin方式提供服务}
+    \item {由内而外：内部给了接口，外部新功能的添加，如Addon，Extension等}
+\end{itemize}
+
+\textbf{插件的完整性}
+\begin{itemize}
+    \item {可执行：宿主程序调用执行得到结果}
+    \item {不可执行：如提交一个新的shader代码到程序内部，渲染不同的结果}
+\end{itemize}
+
+\subsubsection{中间件}
+middleware，中间件是将业务逻辑与底层逻辑解耦的一种方式，就像设备之间的接口一样，确保两端各自独立，中间件
+就沟通两端的。在大型集成项目中使用的一种灵活管理形式，是任意组合组件模型化的高效形式，使得整个业务可以分
+模块并行开发。如果以某种标准的协议为接口的组件就可以任意组合成一个软件的一部分。体现在两个方面：
+\begin{itemize}
+    \item {上下页面分层}
+    \item {层与层之间的解耦}
+\end{itemize}
+
+
+\subsection{敏捷开发}
+核心就是迭代开发，每一次迭代都进行严格的执行顺序：
+\begin{itemize}
+    \item {requirements analysis, 需求分析}
+    \item {design，设计}
+    \item {coding，编码}
+    \item {testing，测试}
+    \item {deployment/evaluation，部署和评估}
+\end{itemize}
+
+
+\section{SOLID}
+
+SOLID是一系列设计原则，帮助组织函数和类以软件具有robust鲁棒性，maintainable可维护性，
+flexible灵活扩展性。
+
+\subsection{Single Responsibility}
+单一职责原则，一个类或函数只有应该只有一个目的，把对象划分成较小粒度，以达到对象的可复用性。
+
+\subsection{Open-Closed}
+开放封闭原则，Uncle Bob称为面向对象设计中最重要的原则，它指软件应该对扩展进行开放，对修改进行关闭。
+
+通过接口或抽象类向外提供不同的策略，具体的策略由具体的类来实现。这样策略分离于具体细节，
+保证了软件的松组合，同时高层的组件保护了底层组件的改变不受影响。
+
+\subsection{Liskov-Substituion}
+里氏替换原则，Barbara Liskov说\textbf{Let f(x) be a property provable about objects x of type T.
+Then f(y) should be true for objects y of type S where S is a subtype of T.}
+
+违背里氏替换原则的就是菱形（钻石）继承，子类通过父类调用祖类的方法时不能确定是那个的。
+
+\subsection{Least Knowledge}
+最少知识原则，指一个软实体应当尽可能少的与其他实体发生相互作用，软体是一个广泛的概念，不仅包括对象，还可指
+系统，类，模块，函数，变量等。
+
+减少对象之间的交互，不让这两个对象直接建立相互关系，因为那样就需要维护彼此的关系。把维护关系的任务交给
+第三者，来承担对象之间的通信作用。
+
+如将军需要挖掘一些散兵坑，将军与士兵的关系不是直接关系，就会出现这样的逻辑，将军通知上校，让上校叫来少校，
+然后让少校叫来上尉，让上尉叫来一军士，让军士唤来一士兵，命令士兵挖掘散兵坑。
+\begin{lstlisting}
+    general.getColonel(c).getMajor(m).getCaptain(c)
+        .getSergeant.getPrivate(p).digFoxhole();
+\end{lstlisting}
+维护这种关系会导致逻辑非常复杂。
+
+\subsection{Interface Segregation}
+接口隔离原则，阻止类依赖那些不是必须的一切
+
+\subsection{Dependency Inversion}
+依赖倒置原则，抽象不应该依赖细节，细节必须依赖抽象。\textbf{Abstractions should not depend on details,
+Details should depend on abstractions.}
+
+\section{Onion Architecture}
+洋葱架构， Wade Waldron，其中最主要的概念是依赖，外部层能够访问内部的层，而内部层对外部的层一无所知。
+
+\subsection{Core}
+核心层是与领域或技术无关的基础架构块，包含一些通用的构件块，不包含任何技术层面的概念
+
+\subsection{Domain}
+领域层是定义业务逻辑的地方，每个类的方法都按照领域通用语言中的概念进行封装命名。对领域层的控制是通过API层
+进行操作的。这种方式保证了应用程序的可移植性，在不丢失任何业务逻辑的情况下替换掉整个技术的实现
+
+\subsection{API}
+API层是领域层的入口，应该仅仅向外界暴露不可变的对象，以避免开发者通过暴露的对象获得对领域层的访问，或修改行为。
+从API层开始编码工作，每个方法就是一个骨架，对应一个高层的功能性测试，随后添加逻辑层，以此驱动领域层的编码实现。
+
+\subsection{Infrastructure}
+基础架构层是最外部的一层，它包含了对接各种技术的适配器，如数据库，UI和外部服务等。

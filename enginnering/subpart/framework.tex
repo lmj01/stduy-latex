@@ -1,0 +1,23 @@
+\clearpage
+\part{Framework}
+框架，成熟的软件开发工具套。
+
+\section{GNU}
+
+\subsection{C library}
+gcc 内置了很多函数，形式为 \textbf{ \_\_builtin\_XXX}为样式。
+GNU的编译器提供了对一些关于位处理的函数
+\begin{itemize}
+    \item { \_\_builtin\_clz, 统计最高位0的个数 }
+    \item { \_\_builtin\_ctz, 统计低位0的个数}
+\end{itemize}
+
+\subsection{GCC}
+
+\begin{lstlisting}
+    gcc -std=c90 # 指定版本
+    # -std=c90 or -std=iso:9899:1990
+    # -std=c99 , -std=c11, -std=c17
+    g++ -std=c++98 # c++03, c++11, c++14, c++17
+\end{lstlisting}
+

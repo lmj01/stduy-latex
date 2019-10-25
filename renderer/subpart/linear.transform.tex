@@ -1,0 +1,162 @@
+
+\clearpage
+\section{线性变换}
+线性变换主要包括缩放、旋转、反射等，不包含平移。线性变换的数学描述为：
+
+\begin{math}
+\begin{aligned}
+f(\alpha v)=\alpha v, \\
+f(u+v)=f(u)+f(v)
+\end{aligned}
+\end{math}
+
+反射，就是把一个物体变换成它的镜像的映射，在二维空间中，用一条直线作为“镜子”；在三维空间中，使用平面作为“镜子”。
+
+\subsection{ 坐标coordinate}
+
+\subsubsection{重心坐标}
+barycentric coordinate.
+
+
+\subsection{ 矩阵matrix }
+矩阵就是线性变换
+\subsubsection{特征向量eigenvector}
+对于一个给定的线性变换（矩阵M，是向量空间E到自身的一个线性变换，可以旋转、反射、拉伸、压缩或变换的组合），它的特征向量V经过这个线性变换之后，得到新的向量U，VU向量共线，但长度可能不一致。
+VU的长度缩放的比例称为特征值eigenvalue。
+
+\subsubsection{余子式minor}
+在n阶行列式D中划去任意选定的k行、k列后，余下的元素按照原来的顺序组成的n-k阶行列式M，M称为
+行列式D的k阶子式A的余子式Minor。如果k阶子式A在行列式D中的行和列的标号分别为
+$i_{1},i_{2},...,i_{k}$和$j_{1},j_{2},...,j_{k}$。则在A的余子式M前面加一个符号：
+\begin{math}
+    \begin{aligned}
+        {-1}^{(i_{1}+i_{2}+...+i_{k}) + (j_{1}+j_{2}+...+j_{k})}
+    \end{aligned}
+\end{math}
+得到的n-k阶行列式，称为行列式D的k阶子式A的代数余子式Cofactor。
+
+\subsubsection{行列式determinant}
+行列式其实是一个函数，一个将方阵转换成一个标量的函数。行列式可以看做是有向面积的概念在一般的欧几里得空间中的推广。
+行列式表示的是线性变换前后的面积（二维）、（三维为体积）等变化的系数。
+
+n阶行列式det(D)等于其任意行(列)的元素与对应的代数余子式的乘积之和。通过D的i行row来计算
+
+\begin{math}
+    \begin{aligned}
+   \det(D)=d_{i1}A_{i1}+...+d_{in}A_{in}=\sum_{j=1}^{n}{a_{ij}(-1)^{(i+j)}A_{ij}}
+    \end{aligned}
+\end{math}
+
+又称为拉普拉斯展开式Laplace expansion，或代数余子式展开式Cofactor expansion
+矩阵和行列式是两个完全不一样的概念，行列式的行和列必须相等。
+
+\subsubsection{伴随矩阵adjoint matrix}
+行列式D的每个元素的代数余子式$A_{ij}$所构成的矩阵，称为矩阵D的伴随矩阵。
+
+\begin{math}
+    \begin{aligned}
+A^{*}= \begin{pmatrix} A_{11}&A_{21}&A_{...}&A_{n1} \\
+A_{12}&A_{22}&A_{...}&A_{n2} \\
+A_{...}&A_{...}&A_{...}&A_{...} \\
+A_{1n}&A_{2n}&A_{...}&A_{nn} \end{pmatrix} = (A_{ij})^T
+\end{aligned}
+\end{math}
+
+伴随矩阵就是线性变换的逆操作，再进行一个缩放的结果，缩放的大小与矩阵的行列式的值有关。
+伴随矩阵定理：
+A是n阶方阵，$A^*$是A的伴随矩阵，则有$AA^*=A^*A=AE$。
+
+\subsubsection{逆矩阵inverse matrix}
+n阶方阵A，存在n阶方阵B，满足$AB=BA=E$,称方阵A可逆，称方阵B是A的逆矩阵，记为$B=A^{-1}$
+
+由伴随矩阵定理与逆矩阵可得
+
+\begin{math}
+    \begin{aligned}
+\begin{cases} A^*A=E\\ AA*=|A|E \end{cases} \Rightarrow A^{-1}=\frac{A^*}{|A|}
+\end{aligned}
+\end{math}
+
+
+\subsubsection{正交矩阵}
+两个向量的内积为零，就说这两个向量是正交的，在三维空间中，正交的两个向量相互垂直。如果相互正交
+向量的长度均为1，又叫做标准正交基。
+在矩阵论中，\textbf{实数}正交矩阵是方块矩阵Q，它的转置矩阵是它的逆矩阵，$Q^TQ=QQ^T=I$。
+注意实数二字，正交矩阵中的元素都是实数，包含复数并且同样满足正交性质的矩阵是酉矩阵，也就是推广
+到复数域之后的“正交矩阵”。
+
+\subsubsection{相似矩阵}
+两个n阶方阵矩阵A与B为相似矩阵当且仅当存在一个n阶方阵的可逆矩阵P，使得$P^{-1}AP=B$或$AP=PB$，
+P被称为矩阵A与B之间的相似变换矩阵。
+白话就是，矩阵是线性空间中的线性变换的一个描述，在一个线性空间中，只要我们选定一组基，那么对于
+任何一个线性变换，都能够用一个确定的矩阵来加以描述。同样的，对于一个线性变换，只要逆选定一组基，
+那么就可以找到一个矩阵来描述这个线性变换。换一组基，就得到一个不同的矩阵。所有这些矩阵都是这
+同一个线性变换的描述，但又都不是线性变换本身。所有这些同一个线性变换的描述的矩阵互为\textbf{相似矩阵}。
+
+\subsubsection{过渡矩阵}
+transition matrix过渡矩阵这个词在数学语境中有很多地方用得，在线性代数中，它用来表示坐标矩阵的变换。
+\newline
+设V为n维向量空间，有两个基$S=\{v_1,...,v_n\}$和$T=\{w_1,...,w_n\}$,
+过渡矩阵$P_{S \leftarrow T}$从T到S的nxn矩阵，它的列项在基S中的形式为：
+
+\begin{math}
+    P_{S \rightarrow T} = [[w_1]_S [w_2]_S ... [w_n]_S]
+\end{math}
+
+举例说明：设$S=\{ e_1,e_2,e_3\}$为标准基，$T=\{ w_1=\begin{bmatrix} 1\\ 1\\ 0 \end{bmatrix}\quad, w_2=\begin{bmatrix}0\\1\\2\end{bmatrix}\quad 
+, w_3=\begin{bmatrix} 1\\1\\1 \end{bmatrix}\quad \}$。
+
+则有\newline
+$P_{S \leftarrow T}=\begin{bmatrix} 1&0&1\\1&1&1\\0&2&1\end{bmatrix}$。
+
+\newline   根据这个关系，可以表示$w_3=2e_2+e_3$。
+
+具体数值的例子：设$S=\{ v_1=\begin{bmatrix}1\\2\\3\end{bmatrix}\quad, v_2=\begin{bmatrix}-2\\1\\0\end{bmatrix}\quad 
+, v_3=\begin{bmatrix} 1\\0\\1 \end{bmatrix}\quad \}$， $T=\{ w_1=\begin{bmatrix} 1\\1\\0\end{bmatrix}\quad, w_2=\begin{bmatrix}0\\1\\2\end{bmatrix}\quad 
+, w_3=\begin{bmatrix} 1\\1\\1 \end{bmatrix}\quad \}$。
+
+\newline  求得在基S中的$w_1$的坐标值$x_1,x_2,x_3$。
+\newline
+由线性关系可得
+
+\begin{math}
+    x_1v_1+x_2v_2+x_3v_3=w_1
+\end{math}
+
+它的增广矩阵为
+\begin{math}
+    [ { \begin{array}{c:c:c:c} 
+        \begin{matrix} v_1&v_2&v_3 \end{matrix} &
+        \begin{matrix} w_1 \end{matrix} &
+        \begin{matrix} w_2 \end{matrix} &
+        \begin{matrix} w_3 \end{matrix} 
+    \end{array}} ] = \Bigg [ {\begin{array}{c:c:c:c} 
+        \begin{matrix} 1&-2&1\\2&1&0\\3&0&1 \end{matrix} &
+        \begin{matrix} 1\\1\\0 \end{matrix} &
+        \begin{matrix} 0\\1\\2 \end{matrix} &
+        \begin{matrix} 1\\1\\1 \end{matrix} 
+    \end{array}}
+    \Bigg ]
+\end{math}
+
+对增广矩阵化简得到
+\begin{math}
+    \Bigg [ {\begin{array}{c:c:c:c} 
+    \begin{matrix} 1&0&0\\0&1&0\\0&0&1 \end{matrix} &
+    \begin{matrix} 1.5\\-2\\-4.5 \end{matrix} &
+    \begin{matrix} 0\\1\\2 \end{matrix} &
+    \begin{matrix} 1\\-1\\-2 \end{matrix} 
+\end{array}}
+\Bigg ]
+\end{math}
+
+得到的最后三列就是$[w_1]_S, [w_2]_S,[w_3]_S$, 即过渡矩阵为
+\begin{math}
+    P_{S \leftarrow T} = \begin{bmatrix}
+        1.5 & 0 & 1 \\
+        -2 & 1 & -1 \\
+        -4.5 & 2 & 2
+    \end{bmatrix}
+\end{math}
+
+过渡矩阵应用在：骨骼算法中，

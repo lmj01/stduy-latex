@@ -1,0 +1,554 @@
+\clearpage
+
+\part{programming language}
+编程语言是工具，是服务于软件工程的最基本的工具。针对不同的需要才会产生对应的语言工具，
+没有一种语言是万能的，是通用的，每一门编程语言都是特定领域的特定产物。
+
+\section{通用概念}
+
+\subsection{异常}
+异常，一般指程序运行期发生的非正常情况，一般是不可预测的，如内存不足，除零等。
+它与软件编程思想、编程语言的发展是与时俱进的，核心思想就是把功能代码模块与系统中
+可能出现的错误处理代码分离开来,以此达到代码组织结构更加美观、逻辑清晰,
+且对软件系统长时间运行提供保障.
+
+\subsubsection{goto}
+goto本质上是对异常处理的思维，也是最初最原始的方法，有点很多，这里列出它的劣势：
+\begin{itemize}
+    \item {在函数的局部作用域内跳转}
+    \item {破坏程序的结构化设计，代码难以测试}
+\end{itemize}
+
+\subsubsection{setjmp}
+c语言中提供了setjmp和longjmp函数，是结构化异常的基础，首先设置一个跳转点setjmp可以实现，
+然后在代码的其他任意地方调用longjmp函数跳回到这个点上。
+\newline
+支持这些功能的是有一个异常结构体，用于保存当前程序的现场。
+\begin{lstlisting}
+    typedef struct {
+        unsigned j_sp;
+        unsigned j_ss;
+        unsigned j_flag;
+        unsigned j_cs;
+        unsigned j_ip;
+        unsigned j_bp;
+        unsigned j_di;
+        unsigned j_es;
+        unsigned j_si;
+        unsigned j_ds;
+    }jmp_buf;
+\end{lstlisting}
+setjmp和longjmp都与这个结构有关，setjmp还是一个能返回两次的函数，第一次是调用时，第二次是longjmp时。
+\begin{lstlisting}
+    #include <stdio.h>
+    #include <setjmp.h>
+    jmp_buf jumper;
+    int div(int a, int b) {
+        if (b == 0) {
+            longjmp(jumper, -3); // the setjmp 
+            //call second with the second parameter
+        }
+        return a / b;
+    }
+    int main(int argc, char **argv) {
+        // longjmp会调用的位置
+        int retcode = setjmp(jumper); 
+        if (retcode == 0) {
+            printf(" div result is %d\n", div(2, 0));
+        } else if (retcode == -3) {
+            printf(" divide by zero");
+        } else {
+            printf(" unhandled error case");
+        }
+        return 0;
+    }
+\end{lstlisting}
+
+\subsubsection{全局处理}
+C++，Java等高级语言的异常处理机制，是借助全局进行处理，并没有专门提供能够有效区分正常逻辑和错误逻辑的语法，
+所有的非正常都当作异常处理，且还会带来较大的性能开销。
+
+\subsection{调用约定}
+函数调用约定，是对函数调用的一个约束和规范，包含
+\begin{itemize}
+    \item {函数参数的压栈顺序}
+    \item {由调用者还是被调用者把参数弹出栈，调用者自己清理堆栈上的参数的，
+    可以实现可变参数列表功能}
+    \item {产生函数修饰名的方法}
+\end{itemize}
+
+\subsubsection{cdecl}
+C declaration,C声明是C语言的一种调用约定，事实上的标准。参数按照从右向左的顺序
+依次压栈，调用者负责清栈。不同编译器不同平台实现的细节上是存在差异的。可编译成对应
+的汇编代码来分析。函数名加一前缀（下划线字符）。
+
+\subsubsection{pascal}
+基于Pascal语言的调用约定,参数从左向右入栈.被调用者负责在返回前清栈.
+
+\subsubsection{stdcall}
+由微软创建的调用约定，是Windows API的标准调用约定。它结合了cdecl和Pascal两者优势，
+参数从右向左入栈，被调用者负责清栈。编译后函数名添加后缀@length,length是传递函数参数
+所占的栈空间的字节长度.
+
+\subsection{语言特性}
+特性，即概念的描述方式，王银在他的文章《如何掌握所有的程序语言》中描述的那样：
+\textbf{如果你不能用一种语言里面的基本特性写出好的代码，那你换成另外的一种语言也
+无济于事。是否能写出好的代码在于人，而不在语言。如果你心中没有清晰简单的思维模型，
+你用任何语言特性表述出来的都是一堆乱码。}
+
+而每个语言特性尽量从古老语言中追溯，新语言的特性完全是封装了一个新的概念在其上，编程
+语言比自然语言简单清晰，也更加严谨和形式化。所以不要想着用尽语言提供的特性，而是使用
+经过千锤百炼的特性才能保证稳定性。
+
+\subsubsection{指针}
+在C，C++语言中，指针是一个很灵活的方法，但不是所有语言都有这种特性，也不适合一些语言。
+它们使用指针是因为它们可以直接与硬件进行沟通，而在现代化的快速应用中，很多软件都是建立在
+一个抽象层上面进行开发的，就是为了确保与硬件无关，所以这些语言根本不需要指针这种概念，如
+Java就没有指针概念！因为它是建立在C，C++编写的应用上面的一种抽象语言。
+
+\subsubsection{mutable与immutable}
+\textbf{mutable}与\textbf{immutable}这两个概念是函数式编程语言中是很基础的概念，它们对变量加强了说明，
+是在语义上进行改进的语言。也是区分静态类型与动态类型语言的一个指标，静态类型语言是要严格区分的！
+
+C++中默认是可变的，不可变的需要加上const，这是比较反常的。这也是C/C++最令人痛苦的过程就是，在很多地方的默认
+是让人不注意的，特别是学习过程中没有入坑解决这些问题，是很难做到条件反射的，总是会产生错觉！
+
+在Rust这样的语言中，为确保类型安全，明确了语言的语义，在语义上通过编译器来保证逻辑上的清晰，既有函数式风格，
+也有系统编程语言的能力，避免存在歧义的语句存在，每一条语句都需要明确到位。
+
+\subsubsection{constant}
+常量，在它的范围内scope只声明一次，不可更改的变量。
+常量表达式，就是在编译期可计算的值，而不是运行期中计算得到的值。
+
+\subsubsection{函数}
+特性有如下特性：
+\begin{itemize}
+    \item {函数是一阶值，First-class valuue, 即函数可以作为另一个函数的返回值或参数，也可作为变量值}
+    \item {函数可以嵌套定义，即一个函数内部可以定义另一个函数}
+    \item {可以捕获引用环境值}
+    \item {允许定义匿名函数}
+    \item {把引用环境和函数代码组成一个可调用的实体}
+\end{itemize}
+根据不同的需求，可以变化为
+\begin{itemize}
+    \item {lambda,匿名函数}
+    \item {Closure，闭包，又称词法闭包lexical closure或函数闭包function closure。
+    是由支持高价函数特性的语言技术，是实现静态作用域的一种方式，将函数与声明时的作用域保存
+    下来，在被调用时的有效作用域是在声明时的，而不是调用执行时的}
+\end{itemize}
+
+\subsubsection{inline}
+内联，短小的函数不存在函数调用的开销，是因为现代编译器都能自动把小函数inline到被调用的地方。
+早期的C语言编译器里，宏就是有这么一个功能，替换小函数，这也是大量使用宏的原因。
+
+\subsubsection{FFI}
+Foreign Function Interface, 是指与其他语言交互的接口，现实中的程序基本没有单语言的软件啦！
+跨语言调用就成了一门语言的必然趋势，常用方法有两种
+\begin{itemize}
+    \item {将函数做出一个服务，通过进程通信IPC或网络通信协议RPC，RESTful等方式进行，至少需要两个进程}
+    \item {直接FFI调用，直接将其他语言接口内嵌到语言中进行调用}
+\end{itemize}
+大多数属于兼容C ABI的实现。
+
+\subsubsection{生成器}
+生成器generator是一种特殊的迭代器，是一个函数，能多次返回的函数，即遇到yield就是返回，下次执行函数时从上一次yield的地方继续执行，这种机制就称为生成器。
+
+yield关键字有两点作用
+\begin{itemize}
+    \item {保存当前运行状态，断点处，然后暂停执行，将生成器函数挂起}
+    \item {将yield关键字后面表达式的值作为返回}
+\end{itemize}
+
+\subsubsection{协程}
+协程是指具有这些函数
+\begin{itemize}
+    \item {彼此间有不同的局部变量，指令指针，但任共享全局变量}
+    \item {可以方便挂起，恢复，并且有多个入口和出口点}
+    \item {多个协程间表现为协作运行，同一时刻只能有一个协程运行，即无法并发，不含多线程情况}
+\end{itemize}
+
+\subsubsection{多态}
+在编程语言和类型论中，多态polymorphism指为不同数据类型的实体提供统一的接口。
+多态类型polymorphic type可以将自身所支持的操作套用到其他类型的值上。
+
+而据派发dispatch发生时间的不同，多态分为静态（编译时）和动态（运行时）。
+
+C++中的虚继承就属于动态多态，它实现的方式是为继承类加入一个域vptr，指向vtbl。继承类调用方法时是先通过vptr到vtbl中找到函数再调用。
+C++中的模板与重载是静态多态，在编译期完成模板展开，直接链接到对应的函数，消除了虚函数的开销。
+
+Rust中引入的trait系统解决了C++中的缺点。
+
+
+\subsection{编程范型}
+The principal programming paradigms.\cite{TPPP}列出了编程范型。
+
+\subsubsection{过程}
+
+\subsubsection{结构化}
+
+\subsubsection{面向对象}
+
+\subsubsection{泛型}
+
+\subsubsection{函数式}
+
+\subsubsection{并发}
+
+\subsubsection{分布式}
+
+\subsubsection{DSL}
+Domain Specific Language,领域编程语言，基于特定领域开发相关的编程语言。
+
+\subsubsection{IDL}
+interface description language, or interface definition language,
+接口描述(定义)语言，是一种语言规范，用来描述组件的API。在跨语言，RPC方面上
+大量应用。
+
+\subsubsection{Glue code}
+glue code language，胶水语言，
+
+\section{计算机组织结构}
+目前接触到的都是冯诺依曼体系结构的计算机，它也是现代计算机的产生的基础。
+\subsection{CPU}
+LSB-least significant bit最低位放在第0位，MSB-most significant bit，最高位放在第0位。
+\newline
+big-endian, first byte(MSB),...,last byte(LSB)
+\newline
+little-endian, first byte(LSB),...,last byte(MSB)。
+\newline
+CPU有两个特色的\textbf{位处理指令}，是硬件层内置，效率很高的。
+\begin{itemize}
+    \item {BSF, 前向位扫描}
+    \item {BSR, 反向位扫描}
+\end{itemize}
+
+\subsubsection{寄存器}
+CPU 只负责运算，不负责存储数据，是LOAD-COMPUTE-SAVE原语模型。从内存中LOAD数据到CPU，执行计算，
+完成后再SAVE回内存，而CPU的效率远高于内存，为解决LOAD和SAVE耗时，CPU自带了寄存器register来缓存，这样CPU优先
+从register中获取数据，再由register与内存交换数据。
+\newline
+\textbf{register相比内存，是没有地址概念的，它们是通过自己的名称，CPU直接对名称进行操作的}
+\newline
+在Intel X86早期时，只要8个寄存器,\textbf{EAX,EBX,ECX,EDX,EDI,ESI,EBP,ESP},除ESP有特定用途（保存当前的stack栈的地址）
+，其他7个是通用性寄存器。现在已经扩展到64位，特定领域的有更高的。 
+
+\subsection{内存模型}
+寄存器个数有限，更多的数据还是存在内存中。程序运行时，操作系统给程序分配一段内存（计算机物理内存可能很大，对不同
+程序都要分配一段逻辑内存，保证每个程序都得到同样的对待）来存储程序和数据。
+\newline
+这段内存有起始地址和结束地址，如0x1000到0x8000.从低地址往高地址，有几个区域，分别为
+\subsubsection{code area}
+代码区，一般是只读区域，存储程序的源代码的二进制形式(即汇编的代码，CPU指令的二进制值指令，每条指令包含操作码，
+操作对象或对象地址的引用)。
+\newline
+\textbf{曾经在我心中的，关于条件分支代码的执行，一直没有明白，总觉得要是这次执行true，下次执行false，那怎么来
+保存这种组合的呢？让我困惑多年的不解之谜，原来就是在这里，所有代码都对应着CPU的执行，总是一遍又一遍的执行相同的
+代码，从这个位置跳转到那个位置进行执行，循环递归下去至永远}
+\newline
+这些操作对象可能是
+\begin{itemize}
+    \item {立即数，直接存在代码区，如具体的数字5}
+    \item {全局数据，在stack中分配空间存储，然后引用该数据的地址}
+    \item {数据区，代码中引用的是它们的地址}
+\end{itemize}
+
+\subsubsection{data area}
+由操作系统根据代码区创建的区域，与内存相关的操作由操作系统申请与释放。
+\begin{itemize}
+    \item {BSS-Block Started by Symbol, 静态内存分配，程序一开始清零的区域，运行期可动态改变；是全局变量未初始化
+    ，以占位符的形式存在，未分配空间，仅记录数据的大小空间
+    }
+    \item {initial global data, 初始化全局变量，只执行一次}
+    \item {static data, 全局，局部的静态变量，字符串，其中关于字符串常量是存在常量区还是stack区域，不同的编译器实现是有差异的}
+\end{itemize}
+
+\subsubsection{heap area}
+向上增长，分配地址越来越大，由程序员分配和释放。
+
+\subsubsection{stack area}
+向下增长，分配地址越来越小。由系统自动分配，包括函数的参数值，局部变量等，执行完成后自动释放。
+
+\subsubsection{argument area}
+命令行参数区域，存放命令行参数和环境变量的值。
+
+\subsubsection{编程语言模型的内存布局}
+很多编程语言模型的内存布局是其性能高低的一个重要参数，C是堆栈结合，C++为了抽象，把对象的内存布局弄得较复杂，特别是多态的引入。
+而想Java或其他语言，有GC的，基本都是在堆上的内存申请。
+rust能到达C的性能，是满足了零抽象，不像C++那样有虚函数的开销，实用性得到满足了。
+
+\section{编译器}
+编译器的技术就是翻译人与机器的沟通，体现在两方面，一是工程化需要，需要大量的交流，不能简简单单的操作硬件来完成；
+一是简化人的交流成本，特别在指定领域，快速的结果是推导前进的基础。
+
+\subsection{概念}
+
+\subsubsection{自举}
+用低级语言先实现一个简单的编译器,然后用这个编译器的语言再去编写一个更高级的编译器.
+新编译器就是旧编译器的扩展,这个过程称为自举.
+
+\subsubsection{交叉编译}
+不是每个设备都像PC这样便利，为其他设备进行软件开发的过程需要的技术。分两类
+\begin{itemize}
+    \item {\textbf{小设备},如嵌入式或手机,在PC上完成编译过程,把打包的二进制放入小设备内存中运行.
+    本质就是 PC 运行小设备的编译器进行开发,这样避免掉小设备的内存、开发环境、效率等限制}
+    \item {\textbf{跨平台},使用Linux编译一个程序,移植portable到window上.本质就是源设备上的编译器,
+    具有生成目标设备上的机器代码的功能}
+\end{itemize}
+
+\subsubsection{JIT}
+Just In Time,即时编译，混合了静态编译与动态解释，将频繁执行的代码编译成机器码缓存起来，对于执行一次的代码任然是
+逐行逐条解释执行的技术。
+\newline
+\textbf{Method JIT}，方法即时编译，如Java。主要的步骤如下
+\begin{itemize}
+    \item {跟踪热点函数，编译成机器码执行，并缓存}
+    \item {非热点函数解释执行}
+\end{itemize}
+\textbf{Trace JIT}, 跟踪即时编译，如Lua，相比Method JIT，它不检测和优化热点函数，而是检测并优化热点跟踪或执行路径。
+
+\subsection{GC}
+Garbage Collection
+\subsubsection{mark-and-sweep}
+系统管理所有创建的对象，每个对象都有对其他对象的引用，root集合代表着已知的系统级别的对象引用。从root集合出发，就可以访问
+到系统引用的所有对象，而没有被访问的对象就是垃圾对象，需要被销毁的，状态分为
+\begin{itemize}
+    \item {white，待访问状态，还未被gc访问到}
+    \item {gray，待扫描状态，已被访问到，但它对其他对象的引用还未访问到}
+    \item {black，已扫描状态，对象关联的都已访问到}
+\end{itemize}
+\begin{lstlisting}
+    all object set white
+    visit root set to  put gray set,
+    make white to gray state 
+    while gray set no empty {
+        fetch object from gray set, object set black 
+        for (obj in all object referenced by object) {
+            if obj is white 
+                obj from white to gray, 
+                and add to gray set 
+        }
+    }
+    for any object {
+        if object is white {
+            destory object 
+        } else {
+            set object white state
+        }
+    }
+\end{lstlisting}
+
+\subsection{BNF}
+Backus-Naur Form巴科斯范式，用来描述计算机语言语法的符号集，是一种典型的元语言，它严格地表示语法规则，
+且描述的语法与上下文无关的,它的扩展是ABNF 
+\cite{ABNF}
+
+\subsubsection{expression}
+表达式在编程语言中代表一个可以返回值的语法单位，在不同语言中有不同的形式：
+\begin{itemize}
+    \item {函数式编程语言，大多数语句都是表达式}
+    \item {命令式编程语言，一般将语句分成表达式和陈述句statement}
+    \item {常量表达式，在BNF中属于终结符}
+\end{itemize}
+
+\subsection{工具}
+Lex \& Yacc是一套生成语法的工具，可以快速方便成型。相对于手写的词法器，具有一定的优势。
+
+
+\section{编译型语言}
+
+\subsection{assembly}
+老实说，汇编是没有学到家的，相当于熟悉了一遍它的常用语法，没有实战经验，最主要的是想
+学的底层技术,并没有融会贯通于硬件层.
+\newline
+多年后（2019.6）才理解，微处理器是管理计算机的算术、逻辑、控制等，都有一套专门的指令码，在汇编中称为
+opcode，操作码，操作码是二进制形式的，如00000011是加法指令，对应着的文本形式就是ADD，即\textbf{汇编语言是
+二进制指令的文本形式，与指令存在一一对应的关系，把汇编的文本转换为二进制后就是CPU的指令码}。
+
+\subsection{C}
+C语言虽然是入门语言. 可是仅仅学了一些照本宣科的知识,没有体会实际中的技巧,更不用谈C中的那些奇淫技巧啦.
+没有足够的机会去应用,就像屠龙之术一样,很多时候学的时候并没有讲得精髓,更多的是一些场面话语,
+官方的教师描述的如此重要的一门语言，一门空谈过多的语言！
+\subsubsection{struct}
+c的struct的用法，很多技术，但是也容易有很多混淆的地方。
+\begin{lstlisting}
+    typedef struct tagS1 {
+        int member;
+    }S1;
+    S1 s1; // 变量声明，等价于struct tagS1 s1;
+    typedef struct {
+        int member;
+    }S2;
+    S2 s2; // 变量声明
+\end{lstlisting}
+
+\subsection{Cplusplus}
+C++引入一个核心概念ADT，Abstract Data Type.是为类型的属性和类型的操作方法提供了一个抽象
+的描述，且不受特定的实现和编程语言的约束。C++使用class关键字来封装数据和函数方法。
+
+\subsubsection{对象模型}
+对象模型的发展有几个阶段，分别是
+
+Simple Object Model，所有的member都不放在object中，只保存指向member的指针。这个模型
+抽象得太理想，很容易理解，但实际中没有应用。
+
+Table-driven Object Model，是为了对所有class的对象object都有一致的表达方式，让object
+内含两个表格指针，分别指向
+\begin{itemize}
+    \item {member data table}
+    \item {function member table}
+\end{itemize}
+
+C++的实际模型是继承了简单对象模型和表格驱动模型的优点，满足在空间和存取的时间效率，
+缺点也存在，就是class内的一些改动就会导致需要重新编译，影响开发效率。模型结构大致如下：
+\begin{itemize}
+    \item {non-static data member, 都在class之内}
+    \item {static data member，都在class之外}
+    \item {function member都在class之外}
+    \item {virtual function，与其他不同。每个class有多个指向virtual function的指针，都放在
+    一个表格中，称为virtual table（vtbl），每个class内含一个指针指向这个virtual table， 这个指针
+    称为vptr}
+\end{itemize}
+
+\subsubsection{成员函数}
+构造函数，只在特定情况下会由编译器构建：
+\begin{itemize}
+    \item {class A中的member是class B的对象，B有默认构造函数，编译器会给A生成一个默认构造函数，
+    用来调用成员class B的对象的初始化，其他member是不会自动初始化的，是程序员的负责对它们进行初始化。
+    需要避免多个默认构造函数，使用inline}
+    \item {class A的基类有默认构造函数，编译器会生成A的默认构造函数，以调用基类的默认构造函数来完成
+    初始化。如果基类没有，编译器不会为A生成默认构造函数}
+    \item {class A存在虚函数，编译器会默认生成构造函数，构造vtbl和vptr}
+    \item {class A存在虚基类，编译器会生成默认构造函数，以初始化虚基类的vtbl}
+\end{itemize}
+
+拷贝构造函数，在以下情况下会由编译器生成，
+\begin{itemize}
+    \item {显示对class A进行初始化}
+    \item {class A作为函数的参数}
+    \item {函数返回一个class A}
+\end{itemize}
+位逐次拷贝，bitwise copy semantics。即class A中不存在class member对象时，拷贝就是对class
+A中的每个bit进行拷贝，即POD（Plain Old Data），这时支持static initializtion，内存布局和对应的
+C语言的struct布局相同。
+
+\subsubsection{多态机制}
+case这个概念是一种编译器指令，它只影响编译器如何解释指针指向的内存大小和内容。
+
+\subsubsection{struct}
+很多适合并没有弄明白C++中的struct和C中的struct的区别，听到更多的是以C++中的概念来理解。
+\begin{lstlisting}
+    struct S1 {
+        int member;
+    };
+    S1 s1; // 变量声明
+    struct S2 {
+        int member;
+    }S2; // S2直接成为一个变量啦
+    S2.member = 1; // 还是全局的变量，直接访问内部
+    typedef struct tagS3 {
+        int member;
+    }S3; // S3是一个结构体类型
+    S3 s3; // 声明变量
+    s3.member; // 必须先声明后使用
+\end{lstlisting}
+
+\subsubsection{value-category}
+C++的表达式具有两个属性，一个是type，一个是value category，判断一个表达式的特征就是参考value-category
+来确定的。
+
+C++11之前，只有两类，lvalue和rvalue，即根据赋值符合的左右来区分，左值是表达式结束运算后
+依然存在的持久对象，右值是表达式结束后就不再存在的临时对象。
+
+C++11开始，引入了移动语义move semantic后，产生了语义上需要。\textbf{注意，计算机语言是计算机科学与语言学的
+交叉科目，很多概念来自语言学内容}。先从自然语言中举个例子来说明
+\begin{enumerate}
+    \item {他是饭桶}
+    \item {这是饭桶}
+\end{enumerate}
+上面两句话都有饭桶这个词，但是意思是不一样的，语法形式上相同的语句，却因代词不同结构完全无关。
+说明一条语句不能仅靠词来确定，还需要整个句子的逻辑性，语义性。C++中也有类似的表达式：
+\begin{enumerate}
+    \item {vec = vect<int>()}
+    \item {vec = another-vec}
+\end{enumerate}
+形式也是一样，但第一句的语义是表示移动赋值，第二句的语义表示复制拷贝一份。所以在C++11中，重新
+定义了value categories：
+\begin{itemize}
+    \item {是否具有identity，即是否可以与另一个表达式进行比较，具有identity同一性的才具有比较
+    的意义，如内存地址，堆栈上的变量都具有identity}
+    \item {是否呈现移动的语义}
+    \begin{itemize}
+        \item {lvalue, 有identity且无移动语义}
+        \item {xvalue，有identity且有移动语义}
+        \item {prvalue，pure rvalue，无identity且有移动语义}
+        \item {glvalue，有identity的表达式}
+        \item {rvalue，有移动语义的表达式。如对象成员表达式，object.member,如果member是枚举或非
+        静态成员函数，则object.member就是prvalue。因为枚举编译后是要给具体的数字，如5，成员函数
+        在编译后是一个相对地址，本质上也是一个具体的数字，CPU使用这些数字时，是直接放在指令内部或
+        寄存器中，不会放在内存中，即没有identity}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{CRTP}
+Curiously Recurring Template Pattern,奇异递归模板模式。1980年作为F-bound polymorphic
+被提出
+\begin{itemize}
+    \item {静态的多态，无法动态绑定。CRTP强迫继承接口，可与Concept这个概念结合来理解}
+    \item {多态的转换调用是在编译期时解决，而不是留到运行期处理，性能得到提高。CRTP起到了虚函数的效果，
+    却无虚函数的开销，因为虚函数需要存储虚函数指针，调用时通过虚函数指针查找虚函数表进行调用}
+    \item {std::enable\_shared\_from\_this针对std::shared\_ptr就是实例，WTL微软的轻量级窗体库}
+\end{itemize}
+
+\subsection{Rust}
+
+\subsubsection{类型系统}
+借鉴了Haskell的类型系统特性有
+\begin{itemize}
+    \item {没有空指针}
+    \item {默认不可变}
+    \item {代数数据类型}
+    \item {高阶函数}
+    \item {模式匹配}
+    \item {trait和关联类型}
+    \item {本地类型推导}
+\end{itemize}
+借鉴了C++的
+\begin{itemize}
+    \item {确定性析构}
+    \item {RAII}
+    \item {智能指针}
+\end{itemize}
+加上本身独有的特性
+\begin{itemize}
+    \item {仿射类型Affine Type，用来表达Rust所有权中的move语义}
+    \item {借用，生命周期}
+\end{itemize}
+
+\subsubsection{生命周期}
+很重要的概念就是生命周期，所有权和移动语义，借用概念。相比C/C++中的默认拷贝赋值，rust中不注意调用一下自己就没啦！
+默认情况下是移动语义，很多时候要强调是借用，就像C的指针，C++的引用一样，使用起来时要注意这些基础的概念，是很容易
+影响写代码的逻辑的。
+
+struct中很重要的概念是生命周期，结构体中的每个字段都是完整的属于自己的，即每个字段的生命周期最终都不会超过
+这个结构体。
+\begin{lstlisting}
+    struct A {
+        attr1: i32,
+        attr2: String,
+    }
+    struct RefBoy<'a> {
+        loca:&'a i32,
+    }
+\end{lstlisting}
+RefBoy的生命期一定不能比'a更长，即结构体里的引用必须要有显式生命周期，一个辈显式写出的生命周期的结构体，其自身
+的生命周期一定小于等于其显式写出的任意一个生命周期。
+
+\section{解释型语言}
+
+\subsection{lua}
+lua目前是没有标准的，是一门小语言，它的优势在于小巧，代码很少，足够到去全部理解，
+用来学习是非常适合的，学习编译原理相关的知识，都可以通过它来一窥乾坤！
+
+\subsection{Javascript}
+
+\subsection{Typescript}

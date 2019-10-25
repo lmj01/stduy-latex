@@ -1,0 +1,19 @@
+
+\section{graph node}
+\begin{center} 
+    \psset{unit=1cm}
+% Nodes
+    \cnodeput(-2, 0){1}{1}  \cnodeput(0, 0){2}{2}
+    \cnodeput( 2, 1){3}{3}  \cnodeput[doubleline=true]( 2,-1){4}{4}
+    \pnode(-3, 0){1tail}    \ncline{->}{1tail}{1} % tailess arcinto (1)
+% Arcs (with labels)
+    \ncline{->}{1}{2} \aput{:U}{1/2} % \aput puts label above arc
+    \ncline{->}{2}{3} \aput{:U}{2/3}
+    \ncline{->}{2}{4} \bput{:U}{2/4} % \bput puts label below arc
+    \ncarc{->}{3}{4} \Aput{\small 3$\rightarrow$4} % \Aput keeps
+    \ncarc{->}{4}{3} \Aput{\small 4$\rightarrow$3} % label horizontal
+    \ncloop[angleB=180,loopsize=.5,arm=.2,linearc=.2]{->}{3}{3}
+        \Bput[5pt]{loop}  % \Bput keeps label horizontal and 5pt is% the space added between label and arc
+    \ncloop[angleA=180,loopsize=.5,arm=.2,linearc=.2]{<-}{4}{4}
+        \Bput[5pt]{loop}
+\end{center} \vspace{1cm}
