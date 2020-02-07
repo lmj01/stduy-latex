@@ -1,18 +1,28 @@
 *.swp
 *.o
 a.out
+*.aux
+*.log
+*.out
+*.gz
+*.toc
+*.pdf
+*.bcf
+*.fls
+*.idx
+*.maf
+*.mtc
+*.mtc0
+*.fdb_latexmk
+*.run.xml
+*.bbl
+*.blg
 
-renderer/*.aux
-renderer/*.log
-renderer/*.out
-renderer/*.pdf
-renderer/*.gz
-renderer/*.toc
+*.dvi
+*.exa
+*.ilg
+*.ind
+
+zhangyu1000/*
 
 
-enginnering/*.aux
-enginnering/*.log
-enginnering/*.out
-enginnering/*.pdf
-enginnering/*.gz
-enginnering/*.toc

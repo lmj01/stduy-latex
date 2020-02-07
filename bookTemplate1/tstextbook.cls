@@ -9,6 +9,8 @@
 % and version 1.3 or later is part of all distributions of LaTeX
 % version 2005/12/01 or later.
 %
+% https://www.typesetters.se/latex-textbook-template/
+%
 % This is a free LaTeX text book template from Typesetters.se.
 % See tstextbook.tex for an example of how to use this class.
 

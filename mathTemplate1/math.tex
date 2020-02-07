@@ -1,0 +1,2983 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Copyright Stefan M. Moser
+%%% 
+%%% Version 1.0, 17 September 2004
+%%% Version 1.1, 28 October 2004
+%%% Version 2.0, 4 June 2006: major revision
+%%% Version 2.1, 6 November 2006: corrected small typos
+%%% Version 2.2, 19 January 2007: revised paragraph about multline
+%%% Version 2.3, 5 April 2007: added note that no additional space is
+%%%              needed in front of operators etc.
+%%% Version 3.0, 13 October 2008: completely rewritten, added nicer
+%%%              layout, added hyperreferences new section about 
+%%%              advanced stuff
+%%% Version 3.1, 23 October 2008: corrected small typos, added comment
+%%%              about needed amsmath.sty, added comment about
+%%%              different matrix-environments
+%%% Version 3.2, 29 September 2009: added comment about IEEEtran.cls
+%%%              and its end-of-proof sign; added strutmode
+%%% Version 3.3, 29 March 2011: example of problem with multline, 
+%%%              new section 5, unary/binary issue, qed problem with 
+%%%              equation, comment about hyperref
+%%% Version 3.4, 28 May 2011: many typo corrections; new section 4.3: 
+%%%              recommendation of using only IEEEeqnarray; new
+%%%              section 6.8 about double-column equations; new
+%%%              section 5.5 about page-breaks
+%%% Version 3.5, 29 October 2011: improved on the fancy frames; added
+%%%              section 6.4; worked over Emacs section and settings;
+%%%              fixed some typos
+%%% Version 3.6, 3 November 2011: fixed mixup of vertical/horizontal
+%%%              alignment 
+%%% Version 3.7, 9 February 2012: added section about brackets with
+%%%              numbering (new Sec. 6.3), added numcases to Sec. 6.2
+%%% Version 4.0, 3 January 2013: Revision based on IEEEtrantools
+%%%              v1.3 (or IEEEtran.cls v1.8): removed section about
+%%%              hyperlink, added section about IEEEproof, revised
+%%%              section about equation-numbering; added \middle
+%%% Version 4.1, 7 February 2013: New section 8 about math symbols;
+%%%              some minor typos corrected
+%%% Version 4.2, 6 August 2013: changed \: to \>; example in Sec. 4.3;
+%%%              \\* for numbers on next line, or QED; typos removed.
+%%% Version 4.3, 16 November 2015: adapted to current version 1.5 of
+%%%              IEEEtrantools (IEEEtran 1.8b); changed away from
+%%%              pstricks to tikz so that compilation works for both
+%%%              latex and pdflatex; removed Case 2 in Section 3
+%%% Version 4.4, 13 March 2016: pointing out a difference between
+%%%              equation and IEEEeqnarray with respect to the
+%%%              equation number; new Section 4.4; use IEEEeqnarray
+%%%              page-layout commands 
+%%% Version 4.5, 21 June 2016: adding fix to italic equation number
+%%%              also for subnumbers; rewritten and fixed section
+%%%              about double-column equations in a two-column
+%%%              document 
+%%% Version 4.6, 29 September 2017: small formulation corrections;
+%%%              fixed and expanded subnumbering (incl. hyperlinks);
+%%%              new paragraph 6.1 about the noalign-command; fixed
+%%%              the treatment of left/right; added index
+%%%
+%%% You may change this code, but you always have to keep this 
+%%% header (you may add to it).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper,11pt]{article}
+
+\newcommand{\version}{Version 4.6}
+
+\usepackage{verbatim}
+\usepackage{calc}
+\usepackage{amsmath,amssymb,mathrsfs}
+\usepackage{centernot}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\usepackage{IEEEtrantools}
+\renewcommand{\IEEEproofindentspace}{2em}
+\IEEEsettextheight{3.2cm}{4cm}
+\IEEEsettopmargin{t}{3.2cm}
+\IEEEquantizetextheight{c}
+\IEEEsettextwidth{3.25cm}{3.25cm}
+\IEEEsetsidemargin{c}{0cm}
+\IEEEsetfootermargin{t}{1.4cm}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{\textsc{How to Typeset Equations in \LaTeX{}}}
+\chead{}
+\rhead{\thepage}
+\lfoot{\small\copyright~Stefan M.~Moser}
+\rfoot{\small\today, \version}
+\cfoot{}
+\setlength{\headwidth}{\textwidth}
+\setlength{\headheight}   {14pt}
+\renewcommand{\headrulewidth}{0pt}
+
+\usepackage{graphicx}
+\usepackage{cases} %For numcases-environment
+\usepackage[newzealand]{babel}
+
+\usepackage{mleftright}
+\usepackage{needspace}
+
+\usepackage{imakeidx}
+\indexsetup{noclearpage=true}
+\makeindex[options=-c,intoc]
+\renewcommand{\indexspace}{\vspace{7mm}}
+%\newcommand{\cindex}[1]{\index{#1@{\tt #1}}}
+
+\usepackage{tikz}
+\usetikzlibrary{shadows} 
+\usepackage[framemethod=tikz]{mdframed} %should be loaded after amsthm.sty
+\global\mdfdefinestyle{myboxstyle}{%
+  shadow=true,
+  linecolor=black,
+  shadowcolor=black,
+  shadowsize=6pt,
+  nobreak=false,
+  innertopmargin=10pt,
+  innerbottommargin=10pt,
+  leftmargin=5pt,
+  rightmargin=5pt,
+  needspace=1cm,
+  skipabove=10pt,
+  skipbelow=15pt,
+  middlelinewidth=1pt,
+  afterlastframe={\vspace{5pt}},
+  aftersingleframe={\vspace{5pt}},
+  tikzsetting={%
+    draw=black,
+    very thick}
+}
+\newmdenv[style=myboxstyle]{whitebox} % framed box that can be broken at end of page
+\newmdenv[style=myboxstyle,backgroundcolor=black!20]{graybox} %gray version of framed box
+
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+%save pageref to label
+\let\lsspageref\pageref
+
+\newlength{\eqboxstorage}
+\newcommand{\eqbox}[1]{
+  \setlength{\eqboxstorage}{\fboxsep}
+  \setlength{\fboxsep}{6pt}
+  \boxed{#1}
+  \setlength{\fboxsep}{\eqboxstorage}
+}
+
+\newcommand{\sizecorr}[1]{\makebox[0cm]{\phantom{$\displaystyle #1$}}} 
+\newcommand{\indep}{\mathrel{\bot}\joinrel\mathrel{\mkern-5mu}\joinrel\mathrel{\bot}}
+\newcommand{\dep}{\centernot\indep}
+\newcommand{\markov}{\mathrel{\multimap}\joinrel\mathrel{-}\joinrel\mathrel{\mkern-6mu}\joinrel\mathrel{-}} 
+\newcommand{\dd}{\mathop{}\!\mathrm{d}}
+
+\makeatletter
+\def\IEEElabelanchoreqn#1{\bgroup
+\def\@currentlabel{\p@equation\theequation}\relax
+\def\@currentHref{\@IEEEtheHrefequation}\label{#1}\relax
+\Hy@raisedlink{\hyper@anchorstart{\@currentHref}}\relax
+\Hy@raisedlink{\hyper@anchorend}\egroup}
+\makeatother
+\newcommand{\subnumberinglabel}[1]{\IEEEyesnumber
+  \IEEEyessubnumber*\IEEElabelanchoreqn{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% --- latexcode and latexcodeonly environments ----
+%
+% The idea and code is stolen from Tobias Oetiker's "Not So Short
+% Introduction to LaTeX". I adapted the code by replacing \textwidth
+% by \linewidth. This version is  hyperref-ready.
+% 
+% This is an environment to show LaTeX code examples both as its
+% actual code and the compiled version. On the left side the source
+% code is given and on the right side the compiled result is shown.
+% For latexcodeonly only the source code is shown, but it is not
+% compiled.
+%
+% Example:
+% \begin{latexcode}
+% \Large This is Large
+% \end{latexcode}
+% \begin{latexcodeonly}
+% \Large This is Large
+% \end{latexcodeonly}
+%
+% --- Definitions for latexcode ----
+\makeatletter
+\newwrite\latexcode@out
+\newcounter{exacnt}
+\setcounter{exacnt}{1}
+\newlength{\savefboxrule}
+\newlength{\savefboxsep}
+\newlength{\outdent}
+\setlength{\outdent}{0cm} %used to be 1cm
+\addtolength{\headwidth}{\outdent}
+\newenvironment{latexcode}%
+{\begingroup% Lets Keep the Changes Local
+  \@bsphack
+  \immediate\openout \latexcode@out \jobname.exa
+  \let\do\@makeother\dospecials\catcode`\^^M\active
+  \def\verbatim@processline{%
+    \immediate\write\latexcode@out{\the\verbatim@line}}%
+  \verbatim@start}%
+{\immediate\closeout\latexcode@out\@esphack\endgroup%
+                                %
+                                % And here comes my part. :-
+                                %   
+  \stepcounter{exacnt}%
+  \setlength{\parindent}{0pt}%
+  \par\addvspace{3.0ex plus 0.8ex minus 0.5ex}\vskip -\parskip
+%  Page \lsspageref{exa:\theexacnt}
+\expandafter\ifx\csname r@exa\theexacnt\endcsname\relax\else
+%\ifx\pdfoutput\undefined % We're not running pdftex
+%  \ifodd\lsspageref{exa\theexacnt}\hspace*{0pt}\else\hspace*{-\outdent}\fi%
+%\else
+%% HyPsd@pageref internal hyperref command v6.69c
+  \ifodd\HyPsd@pageref{exa\theexacnt}\hspace*{0pt}\else\hspace*{-\outdent}\fi%
+%\fi
+\fi
+\makebox[\linewidth][l]{%
+%\raisebox{-\height}[0pt][\totalheight]{%
+  \begin{minipage}[c]{0.5\outdent+0.46\linewidth-3mm}%
+    \small\verbatiminput{\jobname.exa}
+  \end{minipage}%
+                                %}%
+  \hspace{5mm}%
+  \setlength{\savefboxrule}{\fboxrule}%
+  \setlength{\fboxrule}{0.1pt}%
+  \setlength{\savefboxsep}{\fboxsep}%
+  \setlength{\fboxsep}{3mm}%
+  % \raisebox{-\height}[0pt][\totalheight]{%
+  \fbox{%
+    \begin{minipage}{0.5\outdent+0.54\linewidth-3.5mm-2\fboxrule-2\fboxsep}%
+      \setlength{\fboxrule}{\savefboxrule}%
+      \setlength{\fboxsep}{\savefboxsep}%
+      \setlength{\fboxrule}{0.5pt}%
+      \setlength{\parskip}{1ex plus 0.4ex minus 0.2ex}%
+      \begin{trivlist}\item\small\input{\jobname.exa}
+      \end{trivlist}
+    \end{minipage}
+    }%
+%  }%
+}\label{exa\theexacnt}%
+\par\addvspace{3ex plus 0.8ex minus 0.5ex}\vskip -\parskip
+}
+\makeatother
+% ----- end latexcode -----
+
+% --- Definitions for latexcodeonly ----
+\makeatletter
+\newwrite\latexcode@out
+\setcounter{exacnt}{1}
+\setlength{\outdent}{0cm} %used to be 1cm
+\addtolength{\headwidth}{\outdent}
+\newenvironment{latexcodeonly}%
+{\begingroup% Lets Keep the Changes Local
+  \@bsphack
+  \immediate\openout \latexcode@out \jobname.exa
+  \let\do\@makeother\dospecials\catcode`\^^M\active
+  \def\verbatim@processline{%
+    \immediate\write\latexcode@out{\the\verbatim@line}}%
+  \verbatim@start}%
+{\immediate\closeout\latexcode@out\@esphack\endgroup%
+                                %
+                                % And here comes my part. :-
+                                %   
+  \stepcounter{exacnt}%
+  \setlength{\parindent}{0pt}%
+  \par\addvspace{3.0ex plus 0.8ex minus 0.5ex}\vskip -\parskip
+%  Page \lsspageref{exa:\theexacnt}
+\expandafter\ifx\csname r@exa\theexacnt\endcsname\relax\else
+%\ifx\pdfoutput\undefined % We're not running pdftex
+%  \ifodd\lsspageref{exa\theexacnt}\hspace*{0pt}\else\hspace*{-\outdent}\fi%
+%\else
+%% HyPsd@pageref internal hyperref command v6.69c
+  \ifodd\HyPsd@pageref{exa\theexacnt}\hspace*{0pt}\else\hspace*{-\outdent}\fi%
+%\fi
+\fi
+\makebox[\linewidth][l]{%
+%\raisebox{-\height}[0pt][\totalheight]{%
+  \begin{minipage}[c]{0.9\outdent+0.46\linewidth-3mm}%
+    \small\verbatiminput{\jobname.exa}
+  \end{minipage}%
+                                %}%
+  \hspace{5mm}%
+  \setlength{\savefboxrule}{\fboxrule}%
+  \setlength{\fboxrule}{0.1pt}%
+  \setlength{\savefboxsep}{\fboxsep}%
+  \setlength{\fboxsep}{3mm}%
+}\label{exa\theexacnt}%
+\par\addvspace{3ex plus 0.8ex minus 0.5ex}\vskip -\parskip
+}
+\makeatother
+% ----- end latexcodeonly -----
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\textsc{How to Typeset Equations in \LaTeX{}}}
+
+\author{Stefan M.~Moser}
+
+\date{\today\\\version}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+
+\bigskip
+\bigskip
+
+Over the years this manual has grown to quite an extended size.  If
+you have limited time, read Section~\ref{sec:IEEEeqnarray_intro} to
+get the basics.  If you have little more time, read
+Sections~\ref{sec:IEEEeqnarray} and \ref{sec:common-usage} to cover
+the most common situations.
+
+This manual is written with the newest version of \verb+IEEEtran+ in
+mind:\footnote{You can check the version on your system using
+  \texttt{kpsewhich IEEEtrantools.sty} to find the path to the used
+  file and then viewing it. Any current \LaTeX{}-installation has them
+  available and ready to use.} version~1.8b of \verb+IEEEtran.cls+,
+and version~1.5 of \verb+IEEEtrantools.sty+.
+
+This manual is continually being updated. Check for the most current
+version at \url{http://moser-isi.ethz.ch/}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:introduction}
+
+\LaTeX{} is a very powerful tool for typesetting in general and for
+typesetting math in particular. In spite of its power, however, there
+are still many ways of generating better or less good results.  This
+manual offers some tricks and hints that hopefully will lead to the
+former\ldots
+
+Note that this manual does neither claim to provide the best nor the
+only solution. Its aim is rather to give a couple of rules that can be
+followed easily and that will lead to a good layout of all equations
+in a document. It is assumed that the reader has already mastered the
+basics of \LaTeX{}.
+
+The structure of this document is as follows. We introduce the most
+basic equation in Section~\ref{sec:equation};
+Section~\ref{sec:multline} then explains some first possible reactions
+when an equation is too long.  The most important part of the manual
+is contained in Sections~\ref{sec:IEEEeqnarray} and
+\ref{sec:common-usage}: there we introduce the powerful
+\verb+IEEEeqnarray+-environment that should be used in any case
+instead of \verb+align+ or \verb+eqnarray+.
+
+In Section~\ref{sec:advanced-typesetting} some more advanced problems
+and possible solutions are discussed, and
+Section~\ref{sec:emacs-ieeeeqnarray} contains some hints and tricks
+about the editor Emacs. Finally, Section~\ref{sec:some-usef-defin}
+makes some suggestions about some special math symbols that cannot be
+easily found in \LaTeX{}.
+
+In the following any \LaTeX{} command will be set in
+\verb+typewriter font+.  \emph{RHS} stands for \emph{right-hand side},
+i.e., all terms on the right of the equality (or inequality)
+sign. Similarly, \emph{LHS} stands for \emph{left-hand side}, i.e.,
+all terms on the left of the equality sign. To simplify our language,
+we will usually talk about \emph{equality}. Obviously, the typesetting
+does not change if an expression actually is an inequality.
+
+This documents comes together with some additional files that might be
+helpful:
+\begin{itemize}
+\item \verb+typeset_equations.tex+: \LaTeX{} source file of this
+  manual.
+
+\item \verb+dot_emacs+: commands to be included in the preference file
+  of Emacs (\verb+.emacs+) (see Section~\ref{sec:emacs-ieeeeqnarray}).
+  \index{dot\_emacs}\index{.emacs}
+
+\item \verb+IEEEtrantools.sty+ [2015/08/26 V1.5 by Michael Shell]:
+  package needed for the \verb+IEEEeqnarray+-environment. 
+
+\item \verb+IEEEtran.cls+ [2015/08/26 V1.8b by Michael Shell]:
+  \LaTeX{} document class package for papers in IEEE format.
+
+\item \verb+IEEEtran_HOWTO.pdf+ [2015/08]: official manual of the
+  \verb+IEEEtran+-class. The part about \verb+IEEEeqnarray+ is found
+  in Appendix~F.
+
+\end{itemize}
+Note that \verb+IEEEtran.cls+ and \verb+IEEEtrantools.sty+ is provided
+automatically by any up-to-date \LaTeX{}-distribution.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Single Equations: equation}
+\label{sec:equation}
+
+\index{equation}\index{single equation}%
+The main strength of \LaTeX{} concerning typesetting of mathematics is
+based on the package \verb+amsmath+. Every current distribution of
+\LaTeX{} will come with this package included, so you only need to
+make sure that the following line is included in the header of your
+document:\index{amsmath}
+\begin{latexcodeonly}
+\usepackage{amsmath}
+\end{latexcodeonly}
+\noindent
+Throughout this document it is assumed that \verb+amsmath+ is loaded.
+
+Single equations should be exclusively typed using the
+\verb+equation+-environment:
+\begin{latexcode}
+\begin{equation}
+  a = b + c
+\end{equation}
+\end{latexcode}
+\noindent
+In case one does not want to have an equation number, the *-version is
+used:
+\begin{latexcode}
+\begin{equation*}
+  a = b + c
+\end{equation*}
+\end{latexcode}
+\noindent
+All other possibilities of typesetting simple equations have
+disadvantages:
+\begin{itemize}
+\item \index{displaymath} The \verb+displaymath+-environment offers
+  no equation-numbering. To add or to remove a ``*'' in the
+  \verb+equation+-environment is much more flexible.
+\item \index{\$\$} Commands like \verb+$$...$$+,
+    \verb+\[...\]+, etc., have the additional disadvantage that the
+    source code is extremely poorly readable. Moreover, \verb+$$...$$+
+    is faulty: the vertical spacing after the equation is too large in
+    certain situations.
+\end{itemize}
+\needspace{6\baselineskip}
+We summarize:
+\begin{whitebox}
+  \centering 
+  Unless we decide to rely exclusively on \verb+IEEEeqnarray+ (see the
+  discussion in Sections~\ref{sec:remark-about-cons} and
+  \ref{sec:using-ieee-all}), we should only use \verb+equation+ (and
+  no other environment) to produce a single equation.
+\end{whitebox}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Single Equations that are Too Long: multline}
+\label{sec:multline}
+
+\index{single equation!too long}\index{multline}%
+If an equation is too long, we have to wrap it somehow. Unfortunately,
+wrapped equations are usually less easy to read than not-wrapped
+ones. To improve the readability, one should follow certain rules on
+how to do the wrapping:
+\begin{whitebox}
+  \begin{enumerate}
+  \item In general one should always wrap an equation \textbf{before} an
+    equality sign or an  operator.
+    \index{wrapping}\index{equation!wrapping} 
+  \item A wrap before an equality sign is preferable to a wrap
+    before any operator.
+  \item A wrap before a plus- or minus-operator is preferable to a wrap
+    before a multiplication-operator.
+  \item Any other type of wrap should be avoided if ever possible.
+  \end{enumerate}
+\end{whitebox}
+The easiest way to achieve such a wrapping is the use of the
+\verb+multline+-en\-vi\-ron\-ment:\footnote{As a reminder: it is
+  necessary to include the \texttt{amsmath}-package for this command
+  to work!}
+\begin{latexcode}
+\begin{multline}
+  a + b + c + d + e + f 
+  + g + h + i  
+  \\
+  = j + k + l + m + n 
+\end{multline}
+\end{latexcode}
+\noindent
+The difference to the \verb+equation+-environment is that an arbitrary
+line-break (or also multiple line-breaks) can be introduced. This is
+done by putting a \verb+\\+ at those places where the equation needs
+to be wrapped.
+
+Similarly to \verb+equation*+ there also exists a
+\verb+multline*+-version for preventing an equation number.
+
+However, in spite of its ease of use, often the
+\verb+IEEEeqnarray+-environment (see Section~\ref{sec:IEEEeqnarray})
+will yield better results.  Particularly, consider the following
+common situation:
+\begin{latexcode}
+\begin{equation}
+  a = b + c + d + e + f 
+  + g + h + i + j 
+  + k + l + m + n + o + p 
+  \label{eq:equation_too_long}
+\end{equation}
+\end{latexcode}
+\noindent
+Here the RHS is too long to fit on one line. The
+\verb+multline+-environment will now yield the following:
+\begin{latexcode}
+\begin{multline}
+  a = b + c + d + e + f 
+  + g + h + i + j \\
+  + k + l + m + n + o + p
+\end{multline}
+\end{latexcode}
+\noindent
+This is of course much better than \eqref{eq:equation_too_long}, but
+it has the disadvantage that the equality sign loses its natural
+stronger importance over the plus operator in front of $k$. A better
+solution is provided by the \verb+IEEEeqnarray+-environment that will
+be discussed in detail in Sections~\ref{sec:IEEEeqnarray} and
+\ref{sec:common-usage}:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c + d + e + f 
+  + g + h + i + j \nonumber\\
+  && +\> k + l + m + n + o + p  
+  \label{eq:dont_use_multline}
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+In this case the second line is horizontally aligned to the first line:
+the $+$ in front of $k$ is exactly below $b$, i.e., the RHS is clearly
+visible as contrast to the LHS of the equation.
+
+Also note that \verb+multline+ wrongly forces a minimum spacing on the
+left of the first line even if it has not enough space on the right,
+causing a noncentered equation. This can even lead to the very ugly
+typesetting where the second line containing the RHS of an equality is
+actually \emph{to the left} of the first line containing the LHS:
+\begin{latexcode}
+\begin{multline}
+  a + b + c + d + e + f + g 
+  + h + i + j  \\
+  = k + l + m + n + o + p + q
+  + r + s + t + u 
+\end{multline}
+\end{latexcode}
+\noindent
+Again this looks much better using \verb+IEEEeqnarray+:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  \IEEEeqnarraymulticol{3}{l}{%
+    a + b + c + d + e + f + g 
+    + h + i + j  
+  }\nonumber\\*%
+  & = & k + l + m + n + o + p + q
+  + r + s + t + u \nonumber\\*
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+For more details see Section~\ref{sec:ieeeeqnarraymulticol}.
+
+\needspace{6\baselineskip}
+For these reasons we give the following rule:\index{multline}
+\begin{whitebox}
+  \centering
+  The \verb+multline+-environment should exclusively be used in the
+  four specific situations described in
+  Sections~\ref{sec:case1}--\ref{sec:case5} below.
+\end{whitebox}
+
+
+\subsection{Case 1: The expression is not an equation}
+\label{sec:case1}
+
+If the expression is not an equation, i.e., there is no
+equality sign, then there exists no RHS or LHS and \verb+multline+
+offers a nice solution:
+\begin{latexcode}
+\begin{multline}
+  a + b + c + d + e + f \\
+  + g + h + i + j + k + l \\
+  + m + n + o + p + q 
+\end{multline}
+\end{latexcode}
+
+
+\subsection{Case 2: Additional comment}
+\label{sec:case3}
+
+If there is an additional comment at the end of the equation that does
+not fit on the same line, then this comment can be put onto the next
+line:
+\begin{latexcode}
+\begin{multline}
+  a + b + c + d 
+  = e + f + g + h, \quad \\
+  \text{for } 0 \le n 
+  \le n_{\textnormal{max}}
+\end{multline}
+\end{latexcode}
+  
+
+\subsection{Case 3: LHS too long --- RHS too short}
+\label{sec:case4}
+
+\index{RHS!too short, LHS too long}%
+\index{LHS!too long, RHS too short}%
+If the LHS of a single equation is too long and the RHS is very short,
+then one cannot break the equation in front of the equality sign as
+wished, but one is forced to do it somewhere on the LHS. In this case
+one cannot nicely keep the natural separation of LHS and RHS anyway
+and \verb+multline+ offers a good solution:
+\begin{latexcode}
+\begin{multline}
+  a + b + c + d + e + f 
+  + g \\+ h + i + j 
+  + k + l = m
+\end{multline}
+\end{latexcode}
+ 
+
+\subsection{Case 4: A term on the RHS should not be split}
+\label{sec:case5}
+
+The following is a special (and rather rare) case: the LHS would be
+short enough and/or the RHS long enough in order to wrap the equation
+in a way as shown in \eqref{eq:dont_use_multline}, i.e., this usually
+would call for the \verb+IEEEeqnarray+-environment.  However, a term
+on the RHS is an entity that we rather would not split, but it is too
+long to fit:\footnote{For a definition of \texttt{$\backslash$dd}, see
+  Section~\ref{sec:some-usef-defin}.}
+\begin{latexcode}
+\begin{multline}
+  h^{-}(X|Y) \le \frac{n+1}{e} 
+  - h(X|Y)  
+  \\
+  + \int p(y) \log \left(
+    \frac{\mathsf{E}\bigl[|X|^2
+      \big| Y=y\bigr]}{n}
+  \right) \dd y
+\end{multline}
+\end{latexcode}
+\noindent
+In this example the integral on the RHS is too long, but should not be
+split for readability.
+
+Note that even in this case it might be possible to find different
+solutions based on \verb+IEEEeqnarray+-environment:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  \IEEEeqnarraymulticol{3}{l}{
+    h^{-}(X|Y) 
+  }\nonumber\\\quad
+  & \le & \frac{n+1}{e} 
+  - h(X|Y) \nonumber\\
+  && + \int p(y) \log \left(
+    \frac{\mathsf{E}\bigl[|X|^2
+      \big| Y=y\bigr]}{n}
+  \right) \dd y
+  \nonumber\\*
+\end{IEEEeqnarray}
+\end{latexcode}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Multiple Equations: IEEEeqnarray}
+\label{sec:IEEEeqnarray}
+
+In the most general situation, we have a sequence of several
+equalities that do not fit onto one line. Here we need to work with
+horizontal alignment in order to keep the array of equations in a nice
+and readable structure.
+
+Before we offer our suggestions on how to do this, we start with a few
+\emph{bad} examples that show the biggest drawbacks of common
+solutions.
+
+
+\subsection{Problems with traditional commands}
+\label{sec:problems_traditional}
+
+To group multiple equations, the \verb+align+-environment\footnote{The
+  \texttt{align}-environment can also be used to group several blocks
+  of equations beside each other.  However, also for this situation,
+  we recommend to use the \texttt{IEEEeqnarray}-environment with an
+  argument like, e.g., \texttt{\{rCl+rCl\}}.} could be used:\index{align}
+\begin{latexcode}
+\begin{align}
+  a & = b + c \\
+  & = d + e
+\end{align}
+\end{latexcode}
+\noindent
+While this looks neat as long as every equation fits onto one line,
+this approach does not work anymore once a single line is too long:
+\begin{latexcode}
+\begin{align}
+  a & = b + c \\
+  & = d + e + f + g + h + i 
+  + j + k + l \nonumber\\
+  & + m + n + o \\
+  & = p + q + r + s
+\end{align}
+\end{latexcode}
+\noindent
+Here \mbox{$+\> m$} should be below $d$ and not below the equality
+sign. Of course, one could add some space by, e.g.,
+\verb+\hspace{...}+, but this will never yield a precise arrangement
+(and is bad programming style!).
+
+A better solution is offered by the \verb+eqnarray+-environment:
+\begin{latexcode}
+\begin{eqnarray}
+  a & = & b + c \\
+  & = & d + e + f + g + h + i 
+  + j + k + l \nonumber\\
+  && +\> m + n + o \\
+  & = & p + q + r + s
+\end{eqnarray}
+\end{latexcode}
+\noindent
+The \verb+eqnarray+-environment,\footnote{Actually, \texttt{eqnarray}
+  is not an \texttt{amsmath}-command, but stems from the dawn of
+  \LaTeX{}.} however, has a few very severe disadvantages:
+\begin{itemize}
+\item The spaces around the equality signs are too big.
+  Particularly, they are \textbf{not} the same as in the
+  \verb+multline+- and \verb+equation+-environments:
+\begin{latexcode}
+\begin{eqnarray}
+  a & = & a = a
+\end{eqnarray}
+\end{latexcode}
+
+\item The expression sometimes overlaps with the equation number even
+  though there would be enough room on the left:
+\begin{latexcode}
+\begin{eqnarray}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h^2 
+  + i^2 + j 
+  \label{eq:faultyeqnarray}
+\end{eqnarray}
+\end{latexcode}
+
+\item The \verb+eqnarray+-environment offers a command
+  \verb+\lefteqn{...}+ that can be used when the LHS is too long:
+\begin{latexcode}
+\begin{eqnarray}
+  \lefteqn{a + b + c + d 
+    + e + f + g + h}\nonumber\\
+  & = & i + j + k + l + m 
+  \\
+  & = & n + o + p + q + r + s
+\end{eqnarray}
+\end{latexcode}
+\noindent
+Unfortunately, this command is faulty: if the RHS is too short, the
+array is not properly centered:\index{lefteqn}
+\begin{latexcode}
+\begin{eqnarray}
+  \lefteqn{a + b + c + d 
+    + e + f + g + h} 
+  \nonumber\\
+  & = & i + j 
+\end{eqnarray}
+\end{latexcode}
+\noindent
+Moreover, it is very complicated to change the horizontal alignment of
+the equality sign on the second line.
+\end{itemize}
+\needspace{6\baselineskip}
+Thus:\index{eqnarray}
+\begin{whitebox}
+  \centering
+  \textbf{NEVER} ever use the \verb+eqnarray+-environment!
+\end{whitebox}
+
+To overcome these problems we recommend the
+\verb+IEEEeqnarray+-environment.
+
+
+\subsection{Solution: basic usage of IEEEeqnarray}
+\label{sec:IEEEeqnarray_intro}
+
+The \verb+IEEEeqnarray+-environment is a very powerful command with
+many options. In this manual we will only introduce some of the most
+important functionalities. For more information we refer to the
+official manual.\footnote{The official manual
+  \texttt{IEEEtran\_HOWTO.pdf} is distributed together with this short
+  introduction. The part about \texttt{IEEEeqnarray} can be found in
+  Appendix~F.}  First of all, in order to be able to use the
+\verb+IEEEeqnarray+-environment, one needs to include the
+package\footnote{This package is also distributed together with this
+  manual, but it is already included in any up-to-date \LaTeX{}
+  distribution. Note that if a document uses the
+  \texttt{IEEEtran}-class, then \texttt{IEEEtrantools} is loaded
+  automatically and must not be included separately.}
+\verb+IEEEtrantools+. Include the following line in the header of your
+document:\index{IEEEtrantools}
+\begin{latexcodeonly}
+\usepackage{IEEEtrantools}
+\end{latexcodeonly}
+
+The strength of \verb+IEEEeqnarray+ is the possibility of specifying
+the number of \emph{columns} in the equation array. Usually, this
+specification will be \verb+{rCl}+, i.e., three columns, the
+first column right-justified, the middle one centered with a little
+more space around it (therefore we specify capital \verb+C+ instead of
+lower-case \verb+c+) and the third column left-justified:\index{IEEEeqnarray}
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h 
+  + i + j + k \nonumber\\
+  && +\> l + m + n + o 
+  \\
+  & = & p + q + r + s
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+However, we can specify any number of needed columns. For example,
+\verb+{c}+ will give only one column (which is centered) or
+\verb+{rCl"l}+ will add a fourth, left-justified column that is
+shifted to the right (the spacing is defined by the \verb+"+), e.g.,
+for additional specifications. Moreover, beside \verb+l+, \verb+c+,
+\verb+r+, \verb+L+, \verb+C+, \verb+R+ for math mode entries, there
+also exists \verb+s+, \verb+t+, \verb+u+ for left, centered, and right
+text mode entries, respectively. And additional spacing can be added
+by \verb+.+ and \verb+/+ and \verb+?+ and \verb+"+ in increasing
+order.\footnote{For examples of spacing, we refer to
+  Section~\ref{sec:ieeeeqnarraybox}. More spacing types can be found
+  in the examples given in Sections~\ref{sec:linebreak} and
+  \ref{sec:putting-qed-right}, and in the official manual.} More
+details about the usage of \verb+IEEEeqnarray+ will be given in
+Section~\ref{sec:common-usage}.
+
+Note that in contrast to \verb+eqnarray+ the spaces around the equality
+signs are correct.
+
+
+\subsection{A remark about consistency}
+\label{sec:remark-about-cons}
+
+There are three more issues that have not been mentioned so far, but
+that might cause inconsistencies when all three environments,
+\verb+equation+, \verb+multline+, and \verb+IEEEeqnarray+, are used
+intermixedly:
+\begin{itemize}
+\item \verb+multline+ \index{multline} allows for an equation
+  starting on top of a page, while \verb+equation+ and
+  \verb+IEEEeqnarray+ try to put a line of text first, before the
+  equation starts. Moreover, the spacing before and after the
+  environment is not exactly identical for \verb+equation+,
+  \verb+multline+, and \verb+IEEEeqnarray+.
+
+\item \verb+equation+ \index{equation} uses an automatic mechanism to
+  move the equation number onto the next line if the expression is too
+  long. While this is convenient, sometimes the equation number is
+  forced onto the next line, even if there was still enough space
+  available on the line:
+\begin{latexcode}
+\begin{equation}
+  a = \sum_{k=1}^n\sum_{\ell=1}^n 
+  \sin \bigl(2\pi \, b_k \, 
+  c_{\ell} \, d_k \, e_{\ell} \, 
+  f_k \, g_{\ell} \, h  \bigr)  
+\end{equation}
+\end{latexcode}
+  \noindent
+  With \verb+IEEEeqnarray+ the placement of the equation number is fully
+  under our control:\index{IEEEeqnarray!replacing equation}
+\begin{latexcode}
+\begin{IEEEeqnarray}{c}
+  a = \sum_{k=1}^n\sum_{\ell=1}^n 
+  \sin \bigl(2\pi \, b_k \, 
+  c_{\ell} \, d_k \, e_{\ell} \, 
+  f_k \, g_{\ell} \, h  \bigr) 
+  \IEEEeqnarraynumspace
+  \label{eq:labelc1}
+\end{IEEEeqnarray}
+\end{latexcode}
+  \noindent
+  or
+\begin{latexcode}
+\begin{IEEEeqnarray}{c}
+  a = \sum_{k=1}^n\sum_{\ell=1}^n 
+  \sin \bigl(2\pi \, b_k \, 
+  c_{\ell} \, d_k \, e_{\ell} \, 
+  f_k \, g_{\ell} \, h  \bigr) 
+  \nonumber\\*
+  \label{eq:labelc2}
+\end{IEEEeqnarray}
+\end{latexcode}
+
+\item \verb+equation+ forces the equation number to appear in normal
+  font, even if the equation is within an environment\footnote{A
+    typical example of such a situation is an equation inside of a
+    theorem that is typeset in italic font.}  of different font:
+\begin{latexcode}
+\textbf{\textit{\color{red} 
+    This is our main result:
+  \begin{equation}
+    a = b + c
+  \end{equation}}}
+\end{latexcode}
+  \noindent
+  \verb+IEEEeqnarray+ respects the settings of the environment: 
+\begin{latexcode}
+\textbf{\textit{\color{red} 
+    This is our main result:
+  \begin{IEEEeqnarray}{c}
+    a = b + c
+  \end{IEEEeqnarray}}}
+\end{latexcode}
+  \noindent
+  If this is undesired, one can change the behavior of
+  \verb+IEEEeqnarray+ to behave\footnote{For an explanation of the
+    subnumbering, see Section~\ref{sec:equation-numbering}.} like
+  \verb+equation+:\index{equation numbers!italic or bold}
+\begin{latexcodeonly}
+\renewcommand{\theequationdis}{{\normalfont (\theequation)}}
+\renewcommand{\theIEEEsubequationdis}{{\normalfont (\theIEEEsubequation)}}
+\end{latexcodeonly}
+\renewcommand{\theequationdis}{{\normalfont (\theequation)}}
+\renewcommand{\theIEEEsubequationdis}{{\normalfont (\theIEEEsubequation)}}
+\begin{latexcode}
+\textbf{\textit{\color{red} 
+    This is our main result:
+  \begin{IEEEeqnarray}{rCl}
+    a & = & b + c \\
+    & = & d + e \IEEEyesnumber
+    \IEEEyessubnumber
+  \end{IEEEeqnarray}}}
+\end{latexcode}
+\end{itemize}
+
+
+\subsection{Using IEEEeqnarray for all situations}
+\label{sec:using-ieee-all}
+
+As seen above, there might be reason to rely on \verb+IEEEeqnarray+
+exclusively in all situations. 
+
+To replace an \verb+equation+-environment we use \verb+IEEEeqnarray+
+with only one column \verb+{c}+, see \eqref{eq:labelc1} and
+\eqref{eq:labelc2} above.
+
+\index{IEEEeqnarray!replacing multline}%
+Emulating \verb+multline+ is slightly more complicated: we implement
+\verb+IEEEeqnarray+ with only one column \verb+{l}+, use
+\verb+\IEEEeqnarraymulticol+\footnote{For a more detailed explanation
+  of this command, see Section~\ref{sec:ieeeeqnarraymulticol}.} after
+the line-break(s) to adapt the column type of the new line, and
+manually add some shift:
+\begin{latexcode}
+\begin{IEEEeqnarray*}{l}
+  a + b + c + d + e + f 
+  \\ \qquad 
+  +\> g + h + i + j + k + l
+  \qquad \\
+  \IEEEeqnarraymulticol{1}{r}{
+    +\> m + n + o + p + q  }
+  \IEEEyesnumber
+\end{IEEEeqnarray*}
+\end{latexcode}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{More Details about IEEEeqnarray}
+\label{sec:common-usage}
+
+In the following we will describe how we use \verb+IEEEeqnarray+ to
+solve the most common situations.
+
+
+\subsection{Shift to the left: IEEEeqnarraynumspace}
+\label{sec:ieeeeqnarraynumspace}
+
+\index{IEEEeqnarraynumspace}%
+\index{RHS!slightly too long}%
+\index{shift to the left}%
+If a line overlaps with the equation number as in
+\eqref{eq:faultyeqnarray}, the command
+\begin{latexcodeonly}
+\IEEEeqnarraynumspace
+\end{latexcodeonly}
+\noindent
+can be used. It has to be added in the corresponding line and makes
+sure that the whole equation array is shifted by the size of the
+equation numbers (the shift depends on the size of the number!).
+Instead of
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h 
+  + i + j + k + m 
+  \\
+  & = & l + n + o
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+we get
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h 
+  + i + j + k + m
+  \IEEEeqnarraynumspace\\
+  & = & l + n + o
+\end{IEEEeqnarray}
+\end{latexcode}
+
+Note that if there is not enough space on the line, this shift will
+force the numbers to cross the right boundary of the text. So be
+sure to check the result! \index{equation numbers!outside of boundary}
+\begin{latexcode}
+The boundary of the text can be 
+seen from this text above the 
+equation array. The number is 
+clearly beyond it:
+\begin{IEEEeqnarray}{rCl}
+  a & = & d + e + f + g + h 
+  + i + j + k + l + m + n
+  \IEEEeqnarraynumspace
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+In such a case one needs to wrap the equation somewhere.
+
+
+\subsection{First line too long: IEEEeqnarraymulticol}
+\label{sec:ieeeeqnarraymulticol}
+
+\index{lefteqn}\index{IEEEeqnarraymulticol}\index{LHS!too long}%
+If the LHS is too long and as a replacement for the faulty
+\verb+\lefteqn{}+-command, \verb+IEEEeqnarray+ offers the
+\verb+\IEEEeqnarraymulticol+-command, which works in all situations:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  \IEEEeqnarraymulticol{3}{l}{
+    a + b + c + d + e + f 
+    + g + h
+  }\nonumber\\* \quad
+  & = & i + j 
+  \\
+  & = & k + l + m
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+The usage is identical to the \verb+\multicolumns+-command in the
+\verb+tabular+-en\-vi\-ron\-ment. The first argument \verb+{3}+
+specifies that three columns shall be combined into one, which will be
+left-justified \verb+{l}+. We usually add a \verb+*+ to the line-break
+\verb+\\+ to prevent a page-break at this
+position.\index{$\backslash\backslash*$}
+
+Note that by adapting the \verb+\quad+-command one can easily adapt
+the depth of the equation signs,\footnote{I think that one quad is the
+  distance that looks good in most cases.} e.g.,
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  \IEEEeqnarraymulticol{3}{l}{
+    a + b + c + d + e + f 
+    + g + h
+  }\nonumber\\* \qquad\qquad
+  & = & i + j
+  \label{eq:label45}
+  \\
+  & = & k + l + m
+\end{IEEEeqnarray}
+\end{latexcode}
+
+Note that \verb+\IEEEeqnarraymulticol+ must be the first command in a
+cell. This is usually no problem; however, it might be the cause of
+some strange compilation errors. For example, one might put a
+\verb+\label+-command on the first line inside\footnote{I strongly
+  recommend to put each label at the end of the corresponding
+  equation; see Section~\ref{sec:equation-numbering}.} of
+\verb+IEEEeqnarray+, which is OK in general, but not OK if it is
+followed by the \verb+\IEEEeqnarraymulticol+-command. 
+
+
+\subsection{Line-break: unary versus binary operators}
+\label{sec:linebreak}
+
+\index{unary sign}\index{binary sign}\index{line-break}%
+If an equation is split onto two or more lines, \LaTeX{} interprets
+the first $+$ or $-$ as a sign instead of an operator.  Therefore, it
+is necessary to add an additional space \verb+\>+ between the operator
+and the term: instead of
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h 
+  + i + j + k \nonumber\\
+  && + l + m + n + o 
+  \\
+  & = & p + q + r + s
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+we should write
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c 
+  \\
+  & = & d + e + f + g + h 
+  + i + j + k \nonumber\\
+  && +\> l + m + n + o 
+  \label{eq:add_space}
+  \\
+  & = & p + q + r + s
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+(Compare the space between $+$ and $l$!)
+  
+\textbf{Attention:} The distinction between the \emph{unary operator}
+(sign) and the \emph{binary operator} (addition/subtraction) is not
+satisfactorily solved in \LaTeX{}.\footnote{The problem actually goes
+  back to \TeX{}.} In some cases \LaTeX{} will automatically assume
+that the operator cannot be unary and will therefore add additional
+spacing. This happens, e.g., in front of
+\begin{itemize}
+\item an operator name like \verb+\log+, \verb+\sin+, \verb+\det+,
+  \verb+\max+, etc.,
+\item an integral \verb+\int+ or sum \verb+\sum+,
+\item a bracket with adaptive size using \verb+\left+ and
+    \verb+\right+ (this is in contrast to normal brackets or brackets
+  with fixed size like \verb+\bigl(+ and \verb+\bigr)+).
+\end{itemize}
+This decision, however, might be faulty. E.g., it makes perfect
+sense to have a unary operator in front of the logarithm:
+\begin{latexcode}
+\begin{IEEEeqnarray*}{rCl"s}
+  \log \frac{1}{a} 
+  & = & -\log a 
+  & (binary, wrong) \\
+  & = & -{\log a} 
+  & (unary, correct)
+\end{IEEEeqnarray*}
+\end{latexcode}
+\noindent
+In this case, you have to correct it manually. Unfortunately, there is
+no clean way of doing this. To enforce a unary operator, enclosing the
+expression following the unary operator and/or the unary operator
+itself into curly brackets \verb+{...}+ will usually work. For the
+opposite direction, i.e., to enforce a binary operator (as, e.g.,
+needed in \eqref{eq:add_space}), the only option is to put in the
+correct space \verb+\>+ manually.\footnote{This spacing command adds
+  the flexible space \texttt{medmuskip = 4mu plus 2mu minus 4mu}.}
+
+In the following example, compare the spacing between the first
+minus-sign on the RHS and $b$ (or $\log b$):
+\begin{latexcode}
+\begin{IEEEeqnarray*}{rCl's}
+  a & = & - b - b - c 
+  & (default unary) \\
+  & = & {-} {b} - b - c 
+  & (default unary, no effect) \\
+  & = & -\> b - b - c 
+  & (changed to binary) \\
+  & = & - \log b - b - d
+  & (default binary) \\
+  & = & {-} {\log b} - b - d
+  & (changed to unary) \\
+  & = & - \log b - b {-} d
+  & (changed $-d$ to unary) 
+\end{IEEEeqnarray*}
+\end{latexcode}
+
+\needspace{6\baselineskip}
+We learn:
+\begin{whitebox}
+  \centering
+  Whenever you wrap a line, quickly check the result and verify that
+  the spacing is correct!
+\end{whitebox}
+
+
+\subsection{Equation numbers and subnumbers}
+\label{sec:equation-numbering}
+
+\index{equation numbers}\index{numbers}\index{subnumbers}%
+While \verb+IEEEeqnarray+ assigns an equation number to all lines, the
+starred version \verb+IEEEeqnarray*+ suppresses all numbers. This
+behavior can be changed individually per line by the commands
+\begin{center}
+  \verb+\IEEEyesnumber+ and \verb+\IEEEnonumber+ (or
+  \verb+\nonumber+). 
+\end{center}
+For subnumbering the corresponding commands
+\begin{center}
+  \verb+\IEEEyessubnumber+ and \verb+\IEEEnosubnumber+   
+\end{center}
+are available. These four commands only affect the line on which they
+are invoked, however, there also exist starred versions
+\begin{center}
+  \verb+\IEEEyesnumber*+, \verb+\IEEEnonumber*+, \\
+  \verb+\IEEEyessubnumber*+, \verb+\IEEEnosubnumber*+ 
+\end{center}
+that will remain active until the end of the
+\verb+IEEEeqnarray+-environment or until another starred command is
+invoked.
+\index{IEEEyesnumber}\index{IEEEnonumber}\index{nonumber}
+\index{IEEEyessubnumber}\index{IEEEnosubnumber} 
+
+Consider the following extensive example.
+\begin{latexcode}
+\begin{IEEEeqnarray*}{rCl}
+  a
+  & = & b_{1}  \\
+  & = & b_{2}  \IEEEyesnumber\\
+  & = & b_{3}    \\
+  & = & b_{4}  \IEEEyesnumber*\\
+  & = & b_{5}    \\
+  & = & b_{6}    \\
+  & = & b_{7}  \IEEEnonumber\\
+  & = & b_{8}    \\
+  & = & b_{9}  \IEEEnonumber*\\
+  & = & b_{10}   \\
+  & = & b_{11} \IEEEyessubnumber*\\
+  & = & b_{12}   \\
+  & = & b_{13} \IEEEyesnumber\\
+  & = & b_{14}   \\
+  & = & b_{15} 
+\end{IEEEeqnarray*}
+(\ldots some text\ldots)
+\begin{IEEEeqnarray}{rCl}
+  \label{eq:bad_placement}
+  a
+  & = & b_{16} \IEEEyessubnumber*\\
+  & = & b_{17}   \\
+  & = & b_{18} \IEEEyesnumber
+               \IEEEyessubnumber*\\
+  & = & b_{19}   \\
+  & = & b_{20} \IEEEnosubnumber*\\
+  & = & b_{21}   \\
+  & = & b_{22} \nonumber\\
+  & = & b_{23}   
+\end{IEEEeqnarray}
+(\ldots more text\ldots)
+\begin{IEEEeqnarray}{rCl}
+  \IEEEyesnumber\label{eq:block}
+  \IEEEyessubnumber*
+  a
+  & = & b_{24} \\
+  & = & b_{25} 
+  \label{eq:subeq_b}\\
+  & = & b_{26}   
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+Note that the behavior in the line 13 (i.e., the line containing
+$b_{13}$) is probably unwanted: there the command
+\verb+\IEEEyesnumber+ temporarily switches to a normal equation number
+(implicitly resetting the subnumbers), but in the subsequent line the
+\verb+\IEEEyessubnumber*+ from line 11 takes control again, i.e.,
+subnumbering is reactivated. The correct way of increasing the number
+and start directly with a new subnumber is shown in line 18 and in
+line 24.  Also note that the subnumbering works even across different
+\verb+IEEEeqnarray+-environments, as can be seen in line 16.
+
+The best way of understanding the numbering behavior is to note that
+in spite of the eight different commands, there are only three
+different modes:
+\begin{enumerate}
+\item No equation number (corresponding to \verb+\IEEEnonumber+).
+\item A normal equation number (corresponding to
+  \verb+\IEEEyesnumber+): the equation counter is incremented and then
+  displayed.
+\item An equation number with subnumber (corresponding to
+  \verb+\IEEEyessubnumber+): only the subequation counter is
+  incremented and then both the equation and the subequation numbers
+  are displayed. (\emph{Attention:} If the equation number shall be
+  incremented as well, which is usually the case for the start of a
+  new subnumbering, then also \verb+\IEEEyesnumber+ has to be given!)
+\end{enumerate}
+The understanding of the working of these three modes is also
+important when using labels to refer to equations. Note that the label
+referring to an equation with a subnumber must always be given
+\emph{after} the \verb+\IEEEyessubnumber+ command. Otherwise the label
+will refer to the current (or future) main number, which is usually
+undesired. E.g., the label \verb+eq:bad_placement+ in line 16
+points\footnote{To understand this, note that when the
+  \texttt{label}-command was invoked, subnumbering was deactivated. So
+  the label only refers to a normal equation number. However, no such
+  number was active there either, so the label is passed on to line 18
+  where the equation counter is incremented for the first time.}
+(wrongly) to \eqref{eq:bad_placement}.
+
+A correct example is shown in \eqref{eq:block} and \eqref{eq:subeq_b}:
+the label \verb+\label{eq:block}+ refers to the whole block, and the
+label \verb+\label{eq:subeq_b}+ refers to the corresponding
+subequation.
+
+\needspace{6\baselineskip}
+We learn:\index{labels!placing}
+\begin{whitebox}
+  \centering
+  A label should always be put at the end of the equation it belongs
+  to\\(i.e., right in front of the line-break \verb+\\+).
+\end{whitebox}
+Besides preventing unwanted results, this rules also increases the
+readability of the source code and prevents a compilation error in the
+situation of an \verb+\IEEEeqnarraymul+ \verb+ticol+-command after a
+label-definition. \index{IEEEeqnarraymulticol}
+
+
+\subsubsection*{Hyperlinks}
+
+\index{hyperlinks}\index{hyperref}%
+As this document demonstrates, hyperlinking works (almost) seamlessly
+with \verb+IEEEeqn+ \verb+array+. For this document we simply included
+\begin{latexcodeonly}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\end{latexcodeonly}
+\noindent
+in the header, and then all references automatically become hyperlinks.
+
+There is only one small issue that you might have noticed already: the
+reference \eqref{eq:block} points into nirvana. The reason for this is
+that there is no actual equation number \eqref{eq:block} generated and
+therefore \verb+hyperref+ does not create the corresponding
+hyperlink. This can be fixed, but requires some more advanced
+\LaTeX{}-programming. Copy-paste the following code into the document
+header (or your stylefile):
+\begin{latexcodeonly}
+\makeatletter
+\def\IEEElabelanchoreqn#1{\bgroup
+\def\@currentlabel{\p@equation\theequation}\relax
+\def\@currentHref{\@IEEEtheHrefequation}\label{#1}\relax
+\Hy@raisedlink{\hyper@anchorstart{\@currentHref}}\relax
+\Hy@raisedlink{\hyper@anchorend}\egroup}
+\makeatother
+\newcommand{\subnumberinglabel}[1]{\IEEEyesnumber
+  \IEEEyessubnumber*\IEEElabelanchoreqn{#1}}
+\end{latexcodeonly}
+\noindent
+\index{IEEElabelanchoreqn}\index{subnumberinglabel}%
+Now, \verb+\IEEElabelanchoreqn{...}+ creates an anchor for a hyperlink
+to an invisible equation number. The command \verb+\subnumberinglabel+
+then sets this anchor and at the same time activates subnumbering,
+simplifying our typesetting:\index{reference to subequations}
+\index{hyperlinks!block of subequations}
+\begin{latexcode}
+We have
+\begin{IEEEeqnarray}{rCl}
+  \subnumberinglabel{eq:block2}
+  a & = & b + c
+  \label{eq:block2_eq1}\\
+  & = & d + e
+  \label{eq:block2_eq2}
+\end{IEEEeqnarray}
+and
+\begin{IEEEeqnarray}{c}
+  \IEEEyessubnumber*
+  f = g - h + i
+  \label{eq:block2_eq3}
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+Now \eqref{eq:block2} refers to the whole block (the hyperlink points
+to the first line of the first equation array), and
+\eqref{eq:block2_eq1}, \eqref{eq:block2_eq2}, and
+\eqref{eq:block2_eq3} point to the corresponding subequations.
+
+
+\subsubsection*{Alternative subnumbers: subequations}
+
+\index{subequations}\index{hyperlinks!block of subequations}%
+We conclude this section by remarking that \verb+IEEEeqnarray+ is
+fully compatible with the \verb+subequations+-environment. Thus,
+\eqref{eq:block2} can also be created in the following way:
+\begin{latexcode}
+We have
+\begin{subequations}
+  \label{eq:block2_alt}
+  \begin{IEEEeqnarray}{rCl}
+    a & = & b + c
+    \label{eq:block2_eq1_alt}\\
+    & = & d + e
+    \label{eq:block2_eq2_alt}
+  \end{IEEEeqnarray}
+  and
+  \begin{IEEEeqnarray}{c}
+    f = g - h + i
+    \label{eq:block2_eq3_alt}
+  \end{IEEEeqnarray}
+\end{subequations}
+\end{latexcode}
+\noindent
+Note, however, that the hyperlink of \eqref{eq:block2_alt} points to
+the beginning of the \verb+subequations+-environment and not onto the
+first line of the equation array as in \eqref{eq:block2}!
+
+
+\subsection{Page-breaks inside of IEEEeqnarray}
+\label{sec:pagebr-inside-ieee}
+
+\index{page-breaks}\index{IEEEeqnarray!page-breaks}%
+\index{interdisplaylinepenalty}%
+By default, \verb+amsmath+ does not allow page-breaks within multiple
+equations, which usually is too restrictive, particularly, if a
+document contains long equation arrays. This behavior can be changed
+by putting the following line into the document header:
+\begin{latexcodeonly}
+\interdisplaylinepenalty=xx 
+\end{latexcodeonly}
+\noindent
+Here, \verb+xx+ is some number: the larger this number, the less
+likely it is that an equation array is broken over to the next
+page. So, a value 0 fully allows page-breaks, a value 2500 allows
+page-breaks, but only if \LaTeX{} finds no better solution, or a value
+10'000 basically prevents page-breaks (which is the default given in
+\verb+amsmath+).\footnote{I usually use a value 1000 that in principle
+  allows page-breaks, but still asks \LaTeX{} to check if there is no
+  other way.}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Advanced Typesetting}
+\label{sec:advanced-typesetting}
+
+In this section we address a couple of more advanced typesetting
+problems and tools.
+
+
+\subsection{Aligning several separate equation arrays}
+\label{sec:align-sever-separ}
+
+\index{noalign}\index{IEEEeqnarray!align across blocks}%
+\index{aligning across blocks}%
+Sometimes it looks elegant if one can align not just the equations
+within one array, but between several arrays (with regular text in
+between). This can be achieved by actually creating one single large
+array and add additional text in between. For example,
+\eqref{eq:block2} could be typeset as follows:
+\begin{latexcode}
+We have
+\begin{IEEEeqnarray}{rCl}
+  \subnumberinglabel{eq:block3}
+  a & = & b + c
+  \label{eq:block3_eq1}\\
+  & = & d + e
+  \label{eq:block3_eq2}\\
+  \noalign{\noindent and
+    \vspace{2\jot}}
+  f & = & g - h + i
+  \label{eq:block3_eq3}
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+Note how the equality-sign in \eqref{eq:block3_eq3} is aligned to the
+equality-signs of \eqref{eq:block3_eq1} and \eqref{eq:block3_eq2}.
+
+In the code, we add the text ``and'' into the array using the command
+\verb+\noalign{...}+ and then manually add some vertical spacing.
+
+
+\subsection{IEEEeqnarraybox: general tables and arrays}
+\label{sec:ieeeeqnarraybox}
+
+\index{IEEEeqnarraybox}\index{IEEEeqnarrayboxt}\index{IEEEeqnarrayboxm}%
+\index{array}\index{tabular}%
+The package \verb+IEEEtrantools+ also provides the environment
+\verb+IEEEeqnarraybox+. This is basically the same as
+\verb+IEEEeqnarray+ but with the difference that it can be nested
+within other structures. Therefore it does not generate a full
+equation itself nor an equation number. It can be used both in
+text-mode (e.g., inside a table) or in math-mode (e.g., inside an
+equation).\footnote{In case one does not want to let
+  \texttt{IEEEeqnarraybox} to detect the mode automatically, but to
+  force one of these two modes, there are two subforms:
+  \texttt{IEEEeqnarrayboxm} for math-mode and
+  \texttt{IEEEeqnarrayboxt} for text-mode.}  Hence,
+\verb+IEEEeqnarraybox+ is a replacement both for \verb+array+ and
+\verb+tabular+.
+
+\begin{latexcode}
+This is a silly table:
+\begin{center}
+  \begin{IEEEeqnarraybox}{t.t.t}
+    \textbf{Item} & 
+    \textbf{Color} & 
+    \textbf{Count} \\
+    cars & green & 17 \\
+    trucks & red & 4 \\
+    bikes & blue & 25
+  \end{IEEEeqnarraybox}
+\end{center}
+\end{latexcode}
+\noindent
+\index{table}%
+Note that \verb+t+ in the argument of \verb+IEEEeqnarraybox+ stands
+for \emph{centered text} and \verb+.+ adds space between the
+columns. Further possible arguments are \verb+s+ for \emph{left text},
+\verb+u+ for \emph{right text}, \verb+v+ for a vertical line, and
+\verb+V+ for a vertical double-line. More details can be found in
+Tables~IV and V on page~18 in the manual \verb+IEEEtran_HOWTO.pdf+.
+
+Another example:\footnote{For another way of
+  generating case distinctions, see
+  Section~\ref{sec:case-distinctions}.}
+\begin{latexcode}
+\begin{equation}
+  P_U(u) = \left\{ \,
+    \begin{IEEEeqnarraybox}[][c]{l?s}
+      \IEEEstrut
+      0.1 & if $u=0$, \\
+      0.3 & if $u=1$, \\
+      0.6 & if $u=2$.
+      \IEEEstrut
+    \end{IEEEeqnarraybox}
+  \right.
+  \label{eq:example_left_right1}
+\end{equation}
+\end{latexcode}
+\noindent\index{case distinction}%
+\index{IEEEstrut}\index{spacing}\index{vertical spacing}%
+Here \verb+?+ is a large horizontal space between the columns, and
+\verb+\IEEEstrut+ adds a tiny space above the first and below the
+bottom line. Moreover, note that the second optional argument
+\verb+[c]+ makes sure that the \verb+IEEEeqnarraybox+ is vertically
+centered. The other possible values for this option are \verb+[t]+ for
+aligning the first row with the surrounding baseline and \verb+[b]+
+for aligning the bottom row with the surrounding baseline. Default is
+\verb+[b]+, i.e., if we do not specify this option, we get the
+following (in this case unwanted) result:
+\begin{latexcode}
+\begin{equation*}
+  P_U(u) = \left\{ \,
+    \begin{IEEEeqnarraybox}{l?s}
+      0.1 & if $u=0$, \\
+      0.3 & if $u=1$, \\
+      0.6 & if $u=2$.
+    \end{IEEEeqnarraybox}
+  \right.
+\end{equation*}
+\end{latexcode}
+\noindent 
+We also dropped \verb+\IEEEstrut+ here with the result that the curly
+bracket is slightly too small at the top line.  
+
+Actually, these manually placed \verb+\IEEEstrut+ commands are rather
+tiring. More\-over, when we would like to add vertical lines in a table,
+a first naive application of \verb+IEEEeqnarraybox+ yields the
+following:
+\begin{latexcode}
+\begin{equation*}
+  \begin{IEEEeqnarraybox}{c'c;v;c'c'c}
+    D_1 & D_2 && X_1 & X_2
+    & X_3
+    \\\hline
+    0 & 0 && +1 & +1 & +1\\
+    0 & 1 && +1 & -1 & -1\\
+    1 & 0 && -1 & +1 & -1\\
+    1 & 1 && -1 & -1 & +1
+  \end{IEEEeqnarraybox}
+\end{equation*}
+\end{latexcode}
+\noindent\index{IEEEeqnarraystrutmode}%
+We see that \verb+IEEEeqnarraybox+ makes a complete line-break after
+each line. This is of course unwanted. Therefore, the command
+\verb+\IEEEeqnarraystrutmode+ is provided that switches the spacing
+system completely over to struts:
+\begin{latexcode}
+\begin{equation*}
+  \begin{IEEEeqnarraybox}[
+     \IEEEeqnarraystrutmode
+    ]{c'c;v;c'c'c}
+    D_1 & D_2 && X_1 & X_2 & X_3
+    \\\hline
+    0 & 0 && +1 & +1 & +1\\
+    0 & 1 && +1 & -1 & -1\\
+    1 & 0 && -1 & +1 & -1\\
+    1 & 1 && -1 & -1 & +1
+  \end{IEEEeqnarraybox}
+\end{equation*}
+\end{latexcode}
+\noindent\index{table}\index{IEEEeqnarraybox}%
+The strutmode also easily allows to ask for more ``air'' between each
+line and thereby eliminating the need of manually adding an
+\verb+\IEEEstrut+:
+\begin{latexcode}
+\begin{equation*}
+  \begin{IEEEeqnarraybox}[
+     \IEEEeqnarraystrutmode
+     \IEEEeqnarraystrutsizeadd{3pt}
+     {1pt}
+    ]{c'c/v/c'c'c}
+    D_1 & D_2 & & X_1 & X_2 & X_3
+    \\\hline
+    0 & 0 && +1 & +1 & +1\\
+    0 & 1 && +1 & -1 & -1\\
+    1 & 0 && -1 & +1 & -1\\
+    1 & 1 && -1 & -1 & +1
+  \end{IEEEeqnarraybox}
+\end{equation*}
+\end{latexcode}
+\noindent
+Here the first argument of \verb+\IEEEeqnarraystrutsizeadd{3pt}{1pt}+
+adds space above into each line, the second adds space below into each
+line.
+\index{IEEEeqnarraystrutsizeadd}
+
+
+\subsection{Case distinctions}
+\label{sec:case-distinctions}
+
+\index{case distinction}%
+Case distinctions can be generated using \verb+IEEEeqnarraybox+ as
+shown in Section~\ref{sec:ieeeeqnarraybox}. However, in the standard
+situation the usage of \verb+cases+ is simpler and we therefore
+recommend to use this:\index{cases}%
+\begin{latexcode}
+\begin{equation}
+  P_U(u) = 
+  \begin{cases}
+    0.1 & \text{if } u=0,
+    \\
+    0.3 & \text{if } u=1,
+    \\
+    0.6 & \text{if } u=2.
+  \end{cases}
+\end{equation}
+\end{latexcode}
+
+For more complicated examples we do need to rely on
+\verb+IEEEeqnarraybox+:
+\begin{latexcode}
+\begin{equation}
+  \left.
+  \begin{IEEEeqnarraybox}[\IEEEeqnarraystrutmode
+    \IEEEeqnarraystrutsizeadd{2pt}{2pt}][c]{rCl}
+    x & = & a + b\\
+    y & = & a - b
+  \end{IEEEeqnarraybox}
+  \, \right\}  \iff  \left\{ \,
+  \begin{IEEEeqnarraybox}[
+    \IEEEeqnarraystrutmode
+    \IEEEeqnarraystrutsizeadd{7pt}
+    {7pt}][c]{rCl}
+    a & = & \frac{x}{2} + \frac{y}{2} 
+    \\
+    b & = & \frac{x}{2} - \frac{y}{2} 
+  \end{IEEEeqnarraybox}
+  \right.
+  \label{eq:example_left_right2}
+\end{equation}
+\end{latexcode}
+
+If we would like to have a distinct equation number for each case, the
+package\index{cases!individual numbers}\index{numcases}%
+\begin{latexcodeonly}
+\usepackage{cases}
+\end{latexcodeonly}
+\noindent
+provides by far the easiest solution:
+\begin{latexcode}
+\begin{numcases}{|x|=} 
+  x & for $x \geq 0$,
+  \\ 
+  -x & for $x < 0$.
+\end{numcases}
+\end{latexcode}
+\noindent
+Note the differences to the usual \verb+cases+-environment:
+\begin{itemize}
+\item The left-hand side must be typeset as compulsory argument to the
+  environment. 
+\item The second column is not in math-mode but directly in text-mode.
+\end{itemize}
+For subnumbering we can use the corresponding
+\verb+subnumcases+-environment:\index{subnumcases}%
+\begin{latexcode}
+\begin{subnumcases}{P_U(u)=} 
+  0.1 & if $u=0$,
+  \\
+  0.3 & if $u=1$,
+  \\
+  0.6 & if $u=2$.
+\end{subnumcases}
+\end{latexcode}
+
+
+\subsection{Grouping numbered equations with a bracket}
+\label{sec:group-numb-equat}
+
+\index{grouping equations}\index{brackets}%
+Sometimes, one would like to group several equations together with a
+bracket. We have already seen in \eqref{eq:example_left_right2} how
+this can be achieved by using \verb+IEEEeqnarraybox+ inside of an
+\verb+equation+-environment:
+\begin{latexcode}
+\begin{equation}
+  \left\{
+    \begin{IEEEeqnarraybox}[
+      \IEEEeqnarraystrutmode
+      \IEEEeqnarraystrutsizeadd{2pt}
+      {2pt}
+      ][c]{rCl}
+      \dot{x} & = & f(x,u)
+      \\
+      x+\dot{x} & = & h(x)
+    \end{IEEEeqnarraybox}
+  \right.
+\end{equation}
+\end{latexcode}
+\noindent
+The problem here is that since the equation number is provided by the
+\verb+equation+-environment, we only get one equation number. But here
+in this context, an individual number for each equation would make
+much more sense.
+
+We could again rely on \verb+numcases+ (see
+Section~\ref{sec:case-distinctions}), but then we have no way of
+aligning the equations horizontally:
+\begin{latexcode}
+\begin{numcases}{}
+  \dot{x} = f(x,u)
+  \\
+  x+\dot{x} = h(x)
+\end{numcases}
+\end{latexcode}
+\noindent
+Note that misusing the second column of \verb+numcases+ is not an
+option either:
+\begin{latexcode}
+\ldots very poor typesetting:
+\begin{numcases}{}
+  \dot{x} & $\displaystyle 
+  = f(x,u)$
+  \\
+  x+\dot{x} & $\displaystyle
+  = h(x)$
+\end{numcases}
+\end{latexcode}
+
+The problem can be solved using \verb+IEEEeqnarray+: We define an
+extra column on the most left that will only contain the
+bracket. However, as this bracket needs to be far higher than the line
+where it is defined, the trick is to use \verb+\smash+ to make its
+true height invisible to \verb+IEEEeqnarray+, and then ``design'' its
+height manually using the \verb+\IEEEstrut+-command. The number of
+necessary \emph{jots} depends on the height of the equation and needs
+to be adapted
+manually:\index{jot}\index{$\backslash\backslash*$}\index{smash}%
+\begin{latexcode}
+\begin{IEEEeqnarray}{rrCl} 
+  & \dot{x} & = & f(x,u) 
+  \\*
+  \smash{\left\{
+      \IEEEstrut[8\jot]
+    \right.}
+  & x+\dot{x} & = & h(x)
+  \\*
+  & x+\ddot{x} & = & g(x) 
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+The star in \verb+\\*+ is used to prevent the possibility of a
+page-break within the structure.
+
+This works fine as long as the number of equations is odd and the
+total height of the equations above the middle row is about the same
+as the total height of the equations below. For example, for five
+equations (this time using subnumbers for a change):\index{IEEEstrut}
+\begin{latexcode}
+\begin{IEEEeqnarray}{rrCl} 
+  \subnumberinglabel{eq:block4}
+  & a_1 + a_2 & = & f(x,u) 
+  \\*
+  & a_1 & = & \frac{1}{2}h(x) 
+  \\*
+  \smash{\left\{
+      \IEEEstrut[16\jot]
+    \right.}
+  & b & = & g(x,u)
+  \\*
+  & y_{\theta} & = & 
+  \frac{h(x)}{10}
+  \\*
+  & b^2 + a_2 & = & g(x,u) 
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+However, if the heights of the equations differ greatly:
+\begin{latexcode}
+Bad example: uneven height
+distribution:
+\begin{IEEEeqnarray}{rrCl} 
+  \subnumberinglabel{eq:uneven} 
+  & a_1 + a_2 & = & 
+  \sum_{k=1}^{\frac{M}{2}} f_k(x,u) 
+  \\*
+  \smash{\left\{
+      \IEEEstrut[15\jot]
+    \right.}
+  & b & = & g(x,u)
+  \\*
+  & y_{\theta} & = & h(x) 
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+or if the number of equations is even:
+\begin{latexcode}
+Another bad example:
+even number of equations:
+\begin{IEEEeqnarray}{rrCl} 
+  & \dot{x} & = & f(x,u) 
+  \\*
+  \smash{\left\{
+      \IEEEstrut[8\jot]
+    \right.} \nonumber
+  \\*
+  & y_{\theta} & = & h(x)  
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+we get into a problem. To solve this issue, we need manual
+tinkering. In the latter case the basic idea is to use a hidden row at
+a place of our choice. To make the row hidden, we need to manually
+move down the row above the hidden row, and to move up the row below,
+both by about half the usual line spacing:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rrCl} 
+  & \dot{x} & = & f(x,u) 
+  \\*[-0.625\normalbaselineskip] 
+% start invisible row
+  \smash{\left\{
+      \IEEEstrut[6\jot]
+    \right.} \nonumber
+% end invisible row
+  \\*[-0.625\normalbaselineskip]
+  & x+\dot{x} & = & h(x)  
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+In the former case of unequally sized equations, we can put the
+bracket on an individual row anywhere and then moving it up or down
+depending on how we need it. The example \eqref{eq:uneven} with the
+three unequally sized equations then looks as follows:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rrCl} 
+  \subnumberinglabel{eq:uneven2}
+  & a_1 + a_2 & = & 
+  \sum_{k=1}^{\frac{M}{2}} f_k(x,u) 
+  \\*[-0.1\normalbaselineskip]
+  \smash{\left\{
+      \IEEEstrut[12\jot]
+    \right.} \nonumber
+  \\*[-0.525\normalbaselineskip]
+  & b & = & g(x,u)
+  \\*
+  & y_{\theta} & = & h(x) 
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+Note how we can move the bracket up and down by changing the amount of
+shift in both \verb+\\*[...\normalbaselineskip]+-commands: if we add
+$+2$ to the first and $-2$ to the second command (which makes sure
+that in total we have added $2-2=0$), we obtain:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rrCl} 
+  \subnumberinglabel{eq:uneven3}
+  & a_1 + a_2 & = & 
+  \sum_{k=1}^{\frac{M}{2}} f_k(x,u) 
+  \\*[1.9\normalbaselineskip]
+  \smash{\left\{
+      \IEEEstrut[12\jot]
+    \right.} \nonumber
+  \\*[-2.525\normalbaselineskip]
+  & b & = & g(x,u)
+  \\*
+  & y_{\theta} & = & h(x) 
+\end{IEEEeqnarray}
+\end{latexcode}
+\index{normalbaselineskip}%
+
+
+\subsection{Matrices}
+\label{sec:matrices}
+
+\index{matrices}%
+Matrices could be generated by \verb+IEEEeqnarraybox+, however, the
+environment \verb+pmatrix+ is easier to use:
+\begin{latexcode}
+\begin{equation}
+  \mathsf{P} = 
+  \begin{pmatrix}
+    p_{11} & p_{12} & \ldots 
+    & p_{1n} \\
+    p_{21} & p_{22} & \ldots 
+    & p_{2n} \\
+    \vdots & \vdots & \ddots 
+    & \vdots \\
+    p_{m1} & p_{m2} & \ldots 
+    & p_{mn} 
+  \end{pmatrix}
+\end{equation}
+\end{latexcode}
+\noindent
+Note that it is not necessary to specify the number of columns (or
+rows) in advance. More possibilities are \verb+bmatrix+ (for matrices
+with square brackets), \verb+Bmatrix+ (curly brackets), \verb+vmatrix+
+($|$), \verb+Vmatrix+ ($\|$), and \verb+matrix+ (no brackets at all).
+\index{pmatrix}\index{matrix}\index{bmatrix}\index{Bmatrix}%
+\index{vmatrix}\index{Vmatrix}%
+
+
+\subsection{Adapting the size of brackets}
+\label{sec:adapt-size-brack}
+
+\index{left-right}\index{left}\index{right}%
+\index{adapting bracket-size}%
+\index{brackets!adapting size}%
+\LaTeX{} offers the functionality of brackets being automatically
+adapted to the size of the expression they embrace. This is done using
+the pair of directives \verb+\left+ and \verb+\right+:
+\begin{latexcode}
+\begin{equation}
+  f \left( \sum_{k=1}^n b_k \right)
+  =
+  f \Biggl( \sum_{k=1}^n b_k \Biggr)
+  \label{eq:adapt_bracket_size}
+\end{equation}
+\end{latexcode}
+\noindent
+Unfortunately, the \verb+\left+-\verb+\right+ pair has two
+weaknesses. First, it adds too much space before and after the
+brackets. Compare the space between the $f$ and the opening bracket in
+\eqref{eq:adapt_bracket_size}! This can easily be remedied by
+including the following two lines into the document
+header:\index{mleftright}%
+\begin{latexcodeonly}
+\usepackage{mleftright}
+\mleftright
+\end{latexcodeonly}
+\noindent
+\mleftright%
+Then, the example~\eqref{eq:adapt_bracket_size} looks as
+follows:
+\begin{latexcode}
+\begin{equation}
+  f \left( \sum_{k=1}^n b_k \right)
+  =
+  f \Biggl( \sum_{k=1}^n b_k \Biggr)
+\end{equation}
+\end{latexcode}
+\noindent
+
+Second, in certain situations the chosen bracket size is slightly too
+big. For example, this happens when expressions with large
+superscripts are typeset in a smaller font size like in the following
+footnote.\footnote{In footnotes, we get $\left(a^{(1)}\right)$. I
+  suggest to choose the bracket size manually using \texttt{bigl(} and
+  \texttt{bigr)} in such a case: $\bigl(a^{(1)}\bigr)$.}
+In this case it is easiest to adapt the bracket size manually.
+\index{bigl-bigr} 
+
+
+\subsubsection*{Usage}
+
+The brackets do not need to be round, but can be of various types,
+e.g.,
+\begin{latexcode}
+\begin{equation*}
+  \left\| \left( 
+    \left[ \left\{ \left| 
+      \left\lfloor \left\lceil
+        \frac{1}{2}
+      \right\rceil \right\rfloor  
+    \right| \right\} \right] 
+  \right) \right\|
+\end{equation*}
+\end{latexcode}
+\noindent
+It is important to note that \verb+\left+ and \verb+\right+ always
+must occur as a pair, but --- as we have just seen --- they can be
+nested. Moreover, the brackets do not need to match:
+\begin{latexcode}
+\begin{equation*}
+  \left( \frac{1}{2}, 1 \right]
+  \subset \mathbb{R}
+\end{equation*}
+\end{latexcode}
+\noindent
+One side can even be made invisible by using a dot instead of a
+bracket (\verb+\left.+ or \verb+\right.+). We have already seen such
+examples in \eqref{eq:example_left_right1} or
+\eqref{eq:example_left_right2}. 
+
+For an additional element in between a \verb+\left+-\verb+\right+
+pair that should have the same size as the surrounding brackets, the
+command \verb+\middle+ is available:\index{middle}
+\begin{latexcode}
+\begin{equation}
+  H\left(X \, \middle| \, 
+    \frac{Y}{X} \right) 
+\end{equation}
+\end{latexcode}
+\noindent
+Here both the size of the vertical bar and of the round brackets are
+adapted according to the size of $\frac{Y}{X}$.
+
+
+\subsubsection*{Line-break}
+
+\index{line-break}\index{left-right!line-break}%
+Unfortunately, \verb+\left+-\verb+\right+ pairing cannot be done
+across a line-break. So, if we wrap an equation using \verb+multline+
+or \verb+IEEEeqnarray+, we cannot have a \verb+\left+ before and the
+  corresponding \verb+\right+ after a line-break \verb+\\+. In a first
+attempt, we might try to fix this by introducing a \verb+\right.+
+before the line-break and a \verb+\left.+ after the line-break, as
+  shown in the following example:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & \log \left( 1 \right.  
+  \nonumber\\
+  && \qquad \left. + \> 
+    \frac{b}{2} \right)
+  \label{eq:wrong_try}  
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+As can be seen from this example, this approach usually does not work
+because the sizes of the opening and closing brackets do not match
+anymore. In the example \eqref{eq:wrong_try}, the opening bracket
+adapts its size to ``$1$'', while the closing bracket adapts its size
+to $\frac{b}{2}$.
+
+There are two ways to try to fix this. The by far easier way is to
+choose the bracket size manually:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & \log \biggl( 1
+  \nonumber\\
+  && \qquad +\> 
+  \frac{b}{2} \biggr)
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent\index{bigl-bigr}%
+There are four sizes available: in increasing order \verb+\bigl+,
+\verb+\Bigl+, \verb+\biggl+, and \verb+\Biggl+ (with the corresponding
+\verb+..r+-version).  This manual approach will fail, though, if the
+expression in the brackets requires a bracket size larger than
+\verb+\Biggl+, as shown in the following example:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & \log \Biggl( 1
+  \nonumber\\
+  && \qquad + \sum_{k=1}^n 
+  \frac{e^{1+\frac{b_k^2}{c_k^2}}}
+  {1+\frac{b_k^2}{c_k^2}}
+  \Biggr)
+  \label{eq:sizecorr1}
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+For this case we need a trick: since we want to rely on a 
+\begin{latexcodeonly}
+\left( ... \right. \\ \left. ... \right)  
+\end{latexcodeonly}
+\noindent
+construction, we need to make sure that both pairs are adapted to the
+same size. To that goal we define the following command in the
+document header:\index{sizecorr}\index{phantom}
+\begin{latexcodeonly}
+\newcommand{\sizecorr}[1]{\makebox[0cm]{\phantom{$\displaystyle #1$}}} 
+\end{latexcodeonly}
+\noindent
+We then pick the larger of the two expressions on either side of
+\verb+\\+ (in \eqref{eq:sizecorr1} this is the term on the second
+line) and typeset it a second time also on the other side of the
+line-break (inside of the corresponding \verb+\left+-\verb+\right+
+pair). However, since we do not actually want to see this expression
+there, we put it into \verb+\sizecorr{}+ and thereby make it both
+invisible and of zero width (but correct height!). In the example
+\eqref{eq:sizecorr1} this looks as follows:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & \log \left( 
+% copy-paste from below, invisible
+  \sizecorr{ 
+    \sum_{k=1}^n 
+    \frac{e^{1+\frac{b_k^2}{c_k^2}}}
+    {1+\frac{b_k^2}{c_k^2}}
+  } 
+% end copy-paste
+  1 \right. \nonumber\\
+  && \qquad \left. + \sum_{k=1}^n 
+    \frac{e^{1+\frac{b_k^2}{c_k^2}}}
+    {1+\frac{b_k^2}{c_k^2}}
+  \right)
+  \label{eq:sizecorr2}
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+Note how the expression inside of \verb+\sizecorr{}+ does not actually
+appear, but is used for computing the correct bracket size.
+
+
+\subsection{Framed equations}
+\label{sec:framed-equations}
+
+\index{framed equations}%
+To generate equations that are framed, one can use the
+\verb+\boxed{...}+-command.  Unfortunately, this usually will yield a
+too tight frame around the equation:\index{boxed}
+\begin{latexcode}
+\begin{equation}
+  \boxed{
+    a = b + c
+  }
+\end{equation}
+\end{latexcode}
+\noindent
+To give the frame a little bit more ``air'' we need to redefine the
+length-variable \verb+\fboxsep+. We do this in a way that restores its
+original definition afterwards:\index{fboxsep}
+\begin{latexcode}
+\begin{equation}
+  \newlength{\fboxstore}
+  \setlength{\fboxstore}{\fboxsep}
+  \setlength{\fboxsep}{6pt}
+  \boxed{
+    a = b + c
+  }
+  \setlength{\fboxsep}{\fboxstore}
+\end{equation}
+\end{latexcode}
+\noindent
+Note that the \verb+\newlength+-command must be given only once per
+document. To ease one's life, we recommend to define a macro for this
+in the document header:\index{eqbox}
+\begin{latexcodeonly}
+\newlength{\eqboxstorage}
+\newcommand{\eqbox}[1]{
+  \setlength{\eqboxstorage}{\fboxsep}
+  \setlength{\fboxsep}{6pt}
+  \boxed{#1}
+  \setlength{\fboxsep}{\eqboxstorage}
+}
+\end{latexcodeonly}
+\noindent
+Now the framed equation can be produced as follows:
+\begin{latexcode}
+\begin{equation}
+  \eqbox{
+    a = b + c
+  }
+\end{equation}
+\end{latexcode}
+
+In case of \verb+multline+ or \verb+IEEEeqnarray+ this approach does
+not work because the \verb+boxed{...}+ command does not allow
+line-breaks or similar. Therefore we need to rely on
+\verb+IEEEeqnarraybox+ for boxes around equations on several lines:
+\begin{latexcode}
+\begin{equation}
+  \eqbox{
+    \begin{IEEEeqnarraybox}{rCl}
+      a & = & b + c 
+      \\
+      & = & d + e + f + g + h 
+      + i + j + k \\
+      && +\> l + m + n + o 
+      \\
+      & = & p + q + r + s
+    \end{IEEEeqnarraybox}
+  }
+\end{equation}
+\end{latexcode}
+
+Some comments:
+\begin{itemize}
+\item The basic idea here is to replace the original
+  \verb+IEEEeqnarray+ command by a \verb+IEEEeqnarraybox+ and then
+  wrap everything into an \verb+equation+-environment.
+
+\item The equation number is produced by the surrounding
+  \verb+equation+-environment. If we would like to have the equation
+  number vertically centered, we need to center the
+  \verb+IEEEeqnarraybox+:
+\begin{latexcode}
+\begin{equation}
+  \eqbox{
+    \begin{IEEEeqnarraybox}[][c]{rCl}
+      a & = & b + c + d + e 
+      + f + g + h 
+      \\
+      && +\> i + j + k + l 
+      + m + n 
+      \\
+      && +\> o + p + q
+    \end{IEEEeqnarraybox}
+  }
+\end{equation}
+\end{latexcode}
+\noindent
+in constrast to
+\begin{latexcode}
+\begin{equation}
+  \eqbox{
+    \begin{IEEEeqnarraybox}{rCl}
+      a & = & b + c + d + e 
+      + f + g + h 
+      \\
+      && +\> i + j + k + l 
+      + m + n 
+      \\
+      && +\> o + p + q
+    \end{IEEEeqnarraybox}
+  }
+\end{equation}
+\end{latexcode}
+
+\item When changing the \verb+IEEEeqnarray+ into a
+  \verb+IEEEeqnarraybox+, be careful to delete any remaining
+  \verb+\nonumber+ or \verb+\IEEEnonumber+ commands inside of the
+  \verb+IEEEeqnar+ \verb+raybox+!  Since \verb+IEEEeqnarraybox+ does
+  not know equation numbers anyway, any remaining \verb+\nonumber+
+  command will ``leak'' through and prevent \verb+equation+ to put a
+  number!
+\begin{latexcode}
+\begin{equation}
+  \eqbox{
+    \begin{IEEEeqnarraybox}{rCl}
+      a & = & b + c + d + e 
+      + f + g + h \nonumber\\
+      && +\> i + j + k + l 
+    \end{IEEEeqnarraybox}
+  }
+\end{equation}
+\end{latexcode}
+
+\end{itemize}
+
+
+\subsection{Fancy frames}
+\label{sec:more-fancy-frames}
+
+\index{framed equations!fancy}\index{fancy frames}%
+\index{mdframed}\index{amsthm}%
+Fancier frames can be produced using the \verb+mdframed+ package.  Use
+the following commands in the header of your document:\footnote{The
+  \texttt{mdframed}-package should be loaded after amsthm.sty.}
+\begin{latexcodeonly}
+\usepackage{tikz}
+\usetikzlibrary{shadows} %defines shadows
+\usepackage[framemethod=tikz]{mdframed} 
+\end{latexcodeonly}
+\noindent
+Then we can produce all kinds of fancy frames. We start by defining a
+certain style (still in the header of your document):
+\begin{latexcodeonly}
+\global\mdfdefinestyle{myboxstyle}{%
+  shadow=true,
+  linecolor=black,
+  shadowcolor=black,
+  shadowsize=6pt,
+  nobreak=false,
+  innertopmargin=10pt,
+  innerbottommargin=10pt,
+  leftmargin=5pt,
+  rightmargin=5pt,
+  needspace=1cm,
+  skipabove=10pt,
+  skipbelow=15pt,
+  middlelinewidth=1pt,
+  afterlastframe={\vspace{5pt}},
+  aftersingleframe={\vspace{5pt}},
+  tikzsetting={%
+    draw=black,
+    very thick}
+}
+\end{latexcodeonly}
+\noindent
+These settings are quite self-explanatory. Just play around! Now we
+define different types of framed boxes:
+\index{whitebox}\index{graybox}\index{framed equations!breakable}%
+\index{blockwhitebox}\index{blockgraybox}\index{blockbox}%
+\begin{latexcodeonly}
+% framed box that allows page-breaks
+\newmdenv[style=myboxstyle]{whitebox}
+\newmdenv[style=myboxstyle,backgroundcolor=black!20]{graybox}
+
+% framed box that CANNOT be broken at end of page
+\newmdenv[style=myboxstyle,nobreak=true]{blockwhitebox}
+\newmdenv[style=myboxstyle,backgroundcolor=black!20,nobreak=true]{blockgraybox}
+
+% invisible box that CANNOT be broken at end of page
+\newmdenv[nobreak=true,hidealllines=true]{blockbox}
+\end{latexcodeonly}
+\noindent
+As the name suggests, the \verb+graybox+ adds a gray background color
+into the box, while the background in \verb+whitebox+ remains
+white. Moreover, \verb+blockwhitebox+ creates the same framed box as
+\verb+whitebox+, but makes sure that whole box is typeset onto one
+single page, while the regular \verb+whitebox+ can be split onto two
+(or even more) pages.
+
+Examples:
+\begin{latexcode}
+\begin{whitebox}
+  \begin{IEEEeqnarray}[
+      \vspace{-\baselineskip}
+    ]{rCl}
+    a & = & b + c 
+    \\
+    & = & d + e
+  \end{IEEEeqnarray}
+\end{whitebox}
+\end{latexcode}
+\noindent
+or
+\begin{latexcode}
+\begin{graybox}
+  \begin{theorem}
+    This is a fancy theorem: 
+    we know by now that
+    \begin{equation}
+      a = b + c.
+    \end{equation}
+  \end{theorem}
+\end{graybox}
+\end{latexcode}
+\noindent
+Note that in the former example, we have removed some space above the
+equation (that is automatically added by \verb+IEEEeqnarray+) in order
+to have proper spacing. In the latter example we have assumed that the
+\verb+theorem+-environment has been defined in the header:
+\begin{latexcodeonly}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\end{latexcodeonly}
+\index{theorem}\index{amsthm}%
+
+
+\subsection{Putting the QED correctly: proof}
+\label{sec:putting-qed-right}
+
+\index{amsthm}\index{QED!proof}\index{proof}%
+The package \verb+amsthm+ that we have used in
+Section~\ref{sec:more-fancy-frames} to generate a theorem actually
+also defines a \verb+proof+-environment:
+\begin{latexcode}
+\begin{proof}
+  This is the proof of some 
+  theorem. Once the proof is
+  finished, a white box is put
+  at the end to denote QED.
+\end{proof}
+\end{latexcode}
+\noindent
+The QED-symbol should be put on the last line of the proof. However,
+if the last line is an equation, then this is done wrongly:
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation: (bad)
+  \begin{equation*}
+    a = b + c.
+  \end{equation*}
+\end{proof}
+\end{latexcode}
+\noindent
+In such a case, the QED-symbol must be put by hand using the command
+\verb+\qedhere+:\index{qedhere}%
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation: (correct)
+  \begin{equation*}
+    a = b + c. \qedhere
+  \end{equation*}
+\end{proof}
+\end{latexcode}
+
+Unfortunately, this correction does not work for \verb+IEEEeqnarray+:
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation array: (wrong)
+  \begin{IEEEeqnarray*}{rCl}
+    a & = & b + c \\
+    & = & d + e. \qedhere
+  \end{IEEEeqnarray*}  
+\end{proof}
+\end{latexcode}
+\noindent
+The reason for this is the internal structure of \verb+IEEEeqnarray+:
+it always puts two invisible columns at both sides of the array that
+only contain a stretchable space. Thereby, \verb+IEEEeqnarray+ ensures
+that the equation array is horizontally centered. The
+\verb+\qedhere+-command should actually be put \emph{outside} this
+stretchable space, but this does not happen as these columns are
+invisible to the user.
+
+Luckily, there is a very simple remedy: We explicitly define these
+stretching columns ourselves!\index{qedhere!IEEEeqnarray}
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation array: (correct)
+  \begin{IEEEeqnarray*}{+rCl+x*}
+    a & = & b + c \\
+    & = & d + e. & \qedhere
+  \end{IEEEeqnarray*}  
+\end{proof}
+\end{latexcode}
+\noindent
+Here, the \verb=+= in \verb={+rCl+x*}= denotes a stretchable space,
+one on the left of the equations (which, if not specified, will be
+done automatically by \verb+IEEEeqnarray+) and one on the right of the
+equations.  But now on the right, \emph{after} the stretching column,
+we add an empty column \verb=x=. This column will only be needed on
+the last line for putting the \verb+\qedhere+-command.  Finally, we
+specify a \verb=*=. This is a null-space that prevents
+\verb+IEEEeqnarray+ to add another unwanted \verb=+=-space.
+
+In case of a numbered equation, we have a similar problem. If you
+compare
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends with 
+  a numbered equation: (bad)
+  \begin{equation}
+    a = b + c.
+  \end{equation}
+\end{proof}
+\end{latexcode}
+\noindent
+with
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends with 
+  a numbered equation: (better)
+  \begin{equation}
+    a = b + c. \qedhere
+  \end{equation}
+\end{proof}
+\end{latexcode}
+\noindent
+you notice that in the (better) second version the $\Box$ is much
+closer to the equation than in the first version.
+
+Similarly, the correct way of putting the QED-symbol at the end of an
+equation array is as follows:
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation array: (correct)
+  \begin{IEEEeqnarray}{rCl+x*}
+    a & = & b + c \\
+    & = & d + e. \label{eq:star}
+    \\* &&& \qedhere\nonumber
+  \end{IEEEeqnarray}  
+\end{proof}
+\end{latexcode}
+\noindent
+which contrasts with the poorer version:
+\begin{latexcode}
+\begin{proof}
+  This is a proof that ends
+  with an equation array: (bad)
+  \begin{IEEEeqnarray}{rCl}
+    a & = & b + c \\
+    & = & d + e.
+  \end{IEEEeqnarray}  
+\end{proof}
+\end{latexcode}
+\noindent
+Note that we use a starred line-break in \eqref{eq:star} to prevent a
+page-break just before the QED-sign.
+
+We would like to point out that \verb+equation+ does not handle the
+\verb+\qedhere+-command correctly in all cases. Consider the following
+example:
+\begin{latexcode}
+\begin{proof}
+  This is a bad example for the 
+  usage of \verb+\qedhere+ in
+  combination with \verb+equation+:
+  \begin{equation}
+    a = \sum_{\substack{x_i\\
+        |x_i|>0}} f(x_i). 
+    \qedhere
+  \end{equation}
+\end{proof}
+\end{latexcode}
+\noindent
+A much better solution can be achieved with \verb+IEEEeqnarray+:
+\begin{latexcode}
+\begin{proof}
+  This is the corrected example
+  using \verb+IEEEeqnarray+:
+  \begin{IEEEeqnarray}{c+x*}
+    a = \sum_{\substack{x_i\\
+        |x_i|>0}} f(x_i).
+    \\* & \qedhere\nonumber
+  \end{IEEEeqnarray}  
+\end{proof}
+\end{latexcode}
+\noindent
+Here, we add an additional line to the equation array without number,
+and put \verb+\qedhere+ command there (within the additional empty
+column on the right).  Note how the $\Box$ in the bad example is far
+too close the equation number and is actually inside the mathematical
+expression.  A similar problem also occurs in the case of no equation
+number.
+
+\needspace{6\baselineskip}
+Hence:\index{qedhere!equation}
+\begin{whitebox}
+  \centering
+  We recommend not to use \verb+\qedhere+ in combination with
+  \verb+equation+, but exclusively with \verb+IEEEeqnarray+.
+\end{whitebox}
+
+
+\subsection{Putting the QED correctly: IEEEproof}
+\label{sec:putting-qed-right2}
+
+\index{QED!IEEEproof}\index{IEEEproof}%
+\verb+IEEEtrantools+ also provides its own proof-environment that is
+slightly more flexible than the \verb+proof+ of \verb+amsthm+:
+\verb+IEEEproof+. Note that under the \verb+IEEEtran+-class,
+\verb+amsthm+ is not permitted and therefore \verb+proof+ is not
+defined, i.e., one must use \verb+IEEEproof+.
+
+\verb+IEEEproof+ offers the command \verb+\IEEEQEDhere+ that produces
+the QED-symbol right at the place where it is invoked and will switch
+off the QED-symbol at the end.\index{IEEEQEDhere}
+\begin{latexcode}
+\begin{IEEEproof}
+  This is a short proof:
+  \begin{IEEEeqnarray}{rCl+x*}
+    a & = & b + c \\
+    & = & d+ e \label{eq:qed}
+    \\* &&& \nonumber\IEEEQEDhere
+  \end{IEEEeqnarray}
+\end{IEEEproof}
+\end{latexcode}
+\noindent
+So, in this sense \verb+\IEEEQEDhere+ plays the same role for
+\verb+IEEEproof+ as \verb+\qedhere+ for \verb+proof+. Note, however,
+that their behavior is not exactly equivalent: \verb+\IEEEQEDhere+
+always puts the QED-symbol \emph{right at the place} it is invoked and
+does not move it to the end of the line. So, for example, inside of a
+list, an additional \verb+\hfill+ is needed:
+\begin{latexcode}
+\begin{IEEEproof}
+  A proof containing a list and 
+  two QED-symbols:
+  \begin{enumerate}
+  \item Fact one.\IEEEQEDhere
+  \item Fact two.\hfill\IEEEQEDhere
+  \end{enumerate}
+\end{IEEEproof}
+\end{latexcode}
+\noindent
+Unfortunately, \verb+\hfill+ will not work inside an \verb+equation+.
+To get the behavior of \verb+\qedhere+ there, one must use
+\verb+\IEEEQEDhereeqn+ instead:\index{IEEEQEDhereeqn}
+\begin{latexcode}
+\begin{IEEEproof}
+  Placed directly behind math:
+  \begin{equation*}
+    a = b + c. \hfill\IEEEQEDhere
+  \end{equation*}
+  Moved to the end of line:
+  \begin{equation*}
+    a = b + c. \IEEEQEDhereeqn
+  \end{equation*}
+\end{IEEEproof}
+\end{latexcode}
+\noindent
+\verb+\IEEEQEDhereeqn+ even works in situations with equation numbers,
+however, in contrast to \verb+\qedhere+ it does not move the
+QED-symbol to the next line, but puts it in front of the number:
+\begin{latexcode}
+\begin{IEEEproof}
+  Placed directly before the
+  equation number:
+  \begin{equation}
+    a = b + c. \IEEEQEDhereeqn
+  \end{equation}
+  With some additional spacing:
+  \begin{equation}
+    a = b + c. \IEEEQEDhereeqn\;
+  \end{equation}
+\end{IEEEproof}
+\end{latexcode}
+\noindent
+To get the behavior where the QED-symbol is moved to the next line,
+use the approach based on \verb+IEEEeqnarray+ as shown in
+\eqref{eq:qed}. 
+
+\needspace{6\baselineskip}
+Once again:\index{IEEEQEDhereeqn}
+\begin{whitebox}
+  \centering
+  We recommend not to use \verb+\IEEEQEDhere+ and
+  \verb+\IEEEQEDhereeqn+ in combination with \verb+equation+, but to
+  rely on \verb+\IEEEQEDhere+ and \verb+IEEEeqnarray+ exclusively.
+\end{whitebox}
+
+
+\index{IEEEQEDoff}\index{IEEEQEDclosed}\index{IEEEQEDopen}%
+Furthermore, \verb+IEEEproof+ offers the command \verb+\IEEEQEDoff+ to
+suppress the QED-symbol completely; it allows to change the QED-symbol
+to be an open box as in Section~\ref{sec:putting-qed-right}; and it
+allows to adapt the indentation of the proof header (default value is
+\verb+2\parindent+). The latter two features are shown in the
+following example:
+\begin{latexcode}
+\renewcommand{\IEEEproofindentspace}{0em}
+\renewcommand{\IEEEQED}{\IEEEQEDopen}
+\begin{IEEEproof}
+  Proof without 
+  indentation and an
+  open QED-symbol. 
+\end{IEEEproof}
+\end{latexcode}
+\noindent
+The default QED-symbol can be reactivated again by redefining
+\verb+\IEEEQED+ to be \verb+\IEEEQ+ \verb+EDclosed+.
+
+We end this section by pointing out that IEEE standards do not allow a
+QED-symbol and an equation put onto the same line. Instead one should
+follow the example \eqref{eq:qed}.
+
+
+\subsection{Double-column equations in a two-column layout}
+\label{sec:double-column-equat}
+
+\index{double-column equations}%
+Many scientific publications are in a two-column layout in order to
+save space. This means that the available width for the equations is
+considerably smaller than for a one-column layout and will cause
+correspondingly more line-breaks. Then the advantages of the
+\verb+IEEEeqnarray+-environment are even more pronounced.
+
+However, there are very rare situations when the breaking of an
+equation into two or more lines will result in a very poor
+typesetting, even if \verb+IEEEeqnarray+ with all its tricks is used.
+In such a case, a possible solution is to span an equation over both
+columns. But the reader be warned:
+\begin{whitebox}
+  \centering
+  Unless there is no other solution, we strongly discourage from the
+  usage of double-column equations in a two-column layout for
+  aesthetic reasons and because the \LaTeX{} code is rather ugly!
+\end{whitebox}
+
+\index{figure}\index{equation!floating}%
+The trick is to use the \verb+figure+-environment to create a floating
+object containing the equation similarly to a included
+graphic. Concretely, we have to use \verb+figure*+ to create a float
+that stretches over both columns. Since in this way the object becomes
+floating, the equation numbering has to be carefully taken care of.
+
+We explain the details using an example. We start by defining two
+auxiliary equation counters:\index{storeeqcounter}\index{tempeqcounter}%
+\newcounter{storeeqcounter}
+\newcounter{tempeqcounter}
+\begin{latexcodeonly}
+\newcounter{storeeqcounter}
+\newcounter{tempeqcounter}
+\end{latexcodeonly}
+\noindent 
+The counter \verb+storeeqcounter+ will store the equation number that
+is assigned to the floating equation, and the counter
+\verb+tempeqcounter+ will be used to restore the equation counter to
+the correct number after it was temporarily set to the floating
+equation's number stored in \verb+storeeqcounter+.
+
+Note that if there are several floating equations in a document, each
+needs its own unique definition of a \verb+storeeqcounter+, i.e., one
+needs to introduce different names for these counters (e.g.,
+\verb+storeeqcounter_one+, \verb+storeeqcounter_two+, etc.).  The
+counter \verb+tempeqcounter+ can be reused for all floating equations.
+
+Now, in the text where we will refer to the floating equation, we
+need to make sure that the equation number is increased by one (i.e.,
+at this place the equation numbering will jump over one number, which
+is the number assigned to the floating equation), and then we need to
+store this number for later use. This looks as follows:
+\begin{latexcode}
+\ldots and $a$ is given in
+\eqref{eq:floatingeq}
+%
+%% Increase current equation
+%% number and store it:
+\addtocounter{equation}{1}%
+\setcounter{storeeqcounter}%
+ {\value{equation}}%
+%
+on the top of this page/on top of
+Page~\pageref{eq:floatingeq}.
+\end{latexcode}
+\noindent
+Note that one must manually adapt the \LaTeX{} code to either the
+phrase ``on the top of this page'' or the phrase ``on top of
+Page~\pageref{eq:floatingeq}'', depending on where the equation
+actually appears.
+
+Finally we typeset the floating equation:
+\begin{latexcodeonly}
+\begin{figure*}[!t]
+  \normalsize
+  \setcounter{tempeqcounter}{\value{equation}} % temp store of current value
+  \begin{IEEEeqnarray}{rCl}
+    \setcounter{equation}{\value{storeeqcounter}} % number of this equation
+    a & = & b + c + d + e + f + g + h + i + j + k + l + m + n + o + p
+    \nonumber\\
+    && +\> q + r + s + t + u + v + w + x + y + z + \alpha + \beta 
+    + \gamma + \delta + \epsilon 
+    \label{eq:floatingeq}
+  \end{IEEEeqnarray}
+  \setcounter{equation}{\value{tempeqcounter}} % restore correct value
+  \hrulefill
+  \vspace*{4pt}
+\end{figure*}
+\end{latexcodeonly}
+\noindent
+The exact location of this definition depends strongly on where the
+floating structure should be appear, i.e., it might have to be placed
+quite far away from the text where the equation is referred
+to.\footnote{It needs to be placed \emph{after} the reference in the
+  text, though, as otherwise the equation number stored in
+  \texttt{storeeqcounter} is not defined yet. This could again be
+  fixed, but only if we set the equation number (i.e.,
+  \texttt{storeeqcounter}) manually (ugly!!).} Note that this might
+need some trial and error, particularly if there are other floating
+objects around to be placed by \LaTeX{}.
+
+Be aware that due to a limitation of \LaTeX{}, double-column floating
+objects cannot be placed at the bottom of pages, i.e.,
+\verb+\begin{figure*}[!b]+ will not work correctly. This can be
+corrected if we include the following line in the header of our
+document:\index{stfloats}
+\begin{latexcodeonly}
+\usepackage{stfloats}
+\end{latexcodeonly}
+\noindent
+\index{fixltx2e}%
+However, this package is very invasive and might cause troubles with
+other packages.\footnote{In particular, it cannot be used together
+  with the package \texttt{fixltx2e.sty}. Luckily, the latter is not
+  needed anymore starting with TeXLive 2015.}
+
+\begin{figure*}[!t]
+  \normalsize
+  \setcounter{tempeqcounter}{\value{equation}} % temp store of current value
+  \begin{IEEEeqnarray}{rCl}
+    \setcounter{equation}{\value{storeeqcounter}} % number of this equation
+    a & = & b + c + d + e + f + g + h + i + j + k + l + m + n + o + p
+    \nonumber\\
+    && +\> q + r + s + t + u + v + w + x + y + z + \alpha + \beta 
+    + \gamma + \delta + \epsilon 
+    \label{eq:floatingeq}
+  \end{IEEEeqnarray}
+  \setcounter{equation}{\value{tempeqcounter}} % restore correct value
+  \hrulefill
+  \vspace*{4pt}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Emacs and IEEEeqnarray}
+\label{sec:emacs-ieeeeqnarray}
+
+\index{Emacs}%
+When working with Emacs, you can ease your life by defining a few new
+commands. In the \verb+dot_emacs+-file that comes together with this
+document the following commands are
+defined:\index{dot\_emacs}\index{.emacs}% 
+\begin{itemize}
+\item \textbf{Control-c i}: Insert an \verb+IEEEeqnarray+-environment
+  (similar to \textbf{Control-c Control-e}) with argument
+  \verb+{rCl}+.
+  
+\item \textbf{Control-c o}: As \textbf{Control-c i}, but the
+  \mbox{*-version}.
+  
+\item \textbf{Control-c b}: Add a line-break at a specific place. This
+  is very helpful in editing too long lines. Suppose you have typed
+  the following \LaTeX{} code:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c \\
+  & = & d + e + f + g + h + i 
+  + j + k + l + m + n + o
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+After compiling you realize that you have to break the line before
+$l$. You now just have to put the cursor on the $+$-sign in front of
+$l$ and press \textbf{Control-c b}. Then the line is wrapped there and
+also the additional space \verb+\>+ is added at the right place:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a & = & b + c \\
+  & = & d + e + f + g + h + i 
+  + j + k \nonumber\\
+  && +\> l + m + n + o
+\end{IEEEeqnarray}
+\end{latexcode}
+  
+\item \textbf{Control-c n}: As \textbf{Control-c b}, but without
+  adding the additional space \verb+\>+.
+
+\item \textbf{Control-c Control-b}: Remove a line-break (undo of
+  \textbf{Control-c b} and \textbf{Control-c n}). Position the cursor
+  before the \verb+\nonumber+ and press \textbf{Control-c Control-b}.
+
+\item \textbf{Control-c m}: Insert a
+  \verb+\IEEEeqnarraymulticol+-command. This is very helpful when the
+  LHS is too long. Suppose you have typed the following \LaTeX{} code:
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  a + b + c + d + e + f 
+  + g + h + i + j 
+  & = & k + l \\
+  & = & m + n
+\end{IEEEeqnarray}
+\end{latexcode}
+\noindent
+After compiling you realize that the LHS is too long. You now just
+have to put the cursor somewhere on the first line and type
+\textbf{Control-c m}.  Then you get
+\begin{latexcode}
+\begin{IEEEeqnarray}{rCl}
+  \IEEEeqnarraymulticol{3}{l}{
+    a + b + c + d + e + f 
+    + g + h + i + j 
+  }\nonumber \\ \quad
+  & = & k + l \\
+  & = & m + n
+\end{IEEEeqnarray}
+\end{latexcode}
+  
+\item Finally, in the \verb+dot_emacs+-file, settings are given that
+  make \verb+IEEEeqnarray+ and \verb+IEEEeqnarraybox+ known to Emacs'
+  \LaTeX{}-mode, reftex, and ispell. This way many standard Emacs
+  commands can be used as usual also in the context of
+  \verb+IEEEeqnarray+. For example, \textbf{Control-c (} will add an
+  equation label.
+
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Some Useful Definitions}
+\label{sec:some-usef-defin}
+
+\index{Markov chain}\index{symbols!Markov chain}%
+There are a couple of mathematical symbols that cannot easily be found
+in \LaTeX{}-symbol collections. In the following, a few such symbols
+are listed and a possible way is proposed of how to define them.
+\begin{itemize}
+\item \emph{Markov Chains:} One of the existing customary ways to
+  describe that three random variables form a Markov chain is
+\begin{latexcode}
+\begin{equation*}
+  X \markov Y \markov Z
+\end{equation*}
+\end{latexcode}
+\noindent
+Here, the symbol '$\markov$' is defined as a combination of
+\verb+\multimap+ ($\multimap$) and two minus-signs
+($-$):\index{markov}%
+\begin{latexcodeonly}
+\newcommand{\markov}{\mathrel{\multimap}\joinrel\mathrel{-}%
+                     \joinrel\mathrel{\mkern-6mu}\joinrel\mathrel{-}} 
+\end{latexcodeonly}
+\noindent
+For this definition to work, beside \verb+amsmath+ also the package
+\verb+amssymb+ needs to be loaded.\index{amsmath}\index{amssymb}
+
+\item \emph{Independence:} To describe that two random variables are
+  statistically independent, I personally prefer the following symbol:
+  \index{symbols!independence}\index{independence}%
+\begin{latexcode}
+\begin{equation*}
+  X \indep Y
+\end{equation*}
+\end{latexcode}
+\noindent
+Accordingly,\index{symbols!dependence}\index{dependence}%
+\begin{latexcode}
+\begin{equation*}
+  X \dep Y
+\end{equation*}
+\end{latexcode}
+\noindent
+denotes that $X$ and $Y$ are not statistically independent.
+
+These two symbols are created by two \verb+\bot+ ($\bot$) signs:
+\begin{latexcodeonly}
+\newcommand{\indep}{\mathrel{\bot}\joinrel\mathrel{\mkern-5mu}%
+                    \joinrel\mathrel{\bot}}
+\newcommand{\dep}{\centernot\indep} 
+\end{latexcodeonly}
+\noindent
+For this definition to work, beside \verb+amsmath+ also the package
+\verb+centernot+ needs to be loaded.\index{centernot}\index{amsmath}%
+
+
+\item \emph{Integration-$\dd$:} The $\dd$ in an integral is not a
+  variable, but rather an operator. It therefore should not be typeset
+  italic $d$, but Roman $\dd$. Moreover, there should be a small
+  spacing before the operator:\index{symbols!integration-d}\index{dd}%
+  \index{integration-d}%
+\begin{latexcode}
+\begin{equation*}
+  \int_a^b f(x) \dd x = \int_a^b 
+  \ln\left(\frac{x}{2}\right) 
+  \dd x 
+\end{equation*}
+\end{latexcode}
+\noindent
+To make sure that this spacing always works out correctly, I recommend
+the following definition:
+\begin{latexcodeonly}
+\newcommand{\dd}{\mathop{}\!\mathrm{d}}
+\end{latexcodeonly}
+
+\end{itemize}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Some Final Remarks and Acknowledgments}
+\label{sec:some-final-remarks}
+
+The ``rules'' stated in this document are purely based on my own
+experience with typesetting \LaTeX{} in my publications and on my ---
+some people might say unfortunate --- habit of incorporating many
+mathematical expressions in there.
+
+If you encounter any situation that seems to contradict the
+suggestions of this document, then I would be very happy if you could
+send me a corresponding \LaTeX{} or PDF file.  As a matter of fact,
+any kind of feedback, criticism, suggestion, etc.\ is highly
+appreciated!  Write to
+\begin{center}
+  \includegraphics[height=\baselineskip]{email}
+\end{center}
+Thanks!
+
+I would like to mention that during the writing and updating of this
+document I profited tremendously from the help of Michael Shell, the
+author of \verb+IEEEtran+. He was always available for explanations
+when I got stuck somewhere. Moreover, I gratefully acknowledge the
+comments from (in alphabetical order) Helmut B\"olcskei, Amos
+Lapidoth, Edward Ross, Omar Scaglione, and Sergio Verd\'u.
+
+\vspace{0.7cm} 
+\hfill Stefan M.~Moser
+
+
+\vspace{15mm}
+\printindex
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

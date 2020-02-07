@@ -1,0 +1,25 @@
+\clearpage
+
+\section{ Physically }
+
+物理学在图形学的意义是非常重要的
+
+\subsection{Physical Simulation}
+
+\subsubsection{Material Point Method}
+
+物质点法，是一种模拟连续介质的方法，最早被Sulkey等人在1995年发明。
+与有限元相比，可以把MPM里面的grid nodes对应到FEM中的DOFs，
+把MPM里面的particles对应到FEM中的quadrature points。和FEM里使用显式网格策略
+不同，作为一种Element-Free Galerkin（EFG）方法，MPM里面并没有显式的Elements
+和Lagrangian grid，只有能够随意移动的粒子，作为quadrature points。这样的特性
+非常适合处理大形变，而其背景网格带来的自动碰撞处理，多材料耦合等。由于离散化
+出自weak form，使得MPM的physical accuracy有了保证。
+
+\subsubsection{Moving Least Squares Material Point Method}
+
+移动最小二乘物质点法，
+
+\subsection{硬渲染}
+
+
