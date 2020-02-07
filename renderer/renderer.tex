@@ -63,27 +63,10 @@
 
 %-----正文
 \input{subpart/rasterize.lighting.tex}
-
 \input{subpart/algorithm.tex}
-
-% 线性变换
 \input{subpart/linear.transform.tex}
-
-\clearpage
-\section{现状}
-sss ss 
-\subsection{软渲染}
-
-
-\subsection{硬渲染}
-
-\section{OpenGL}
-
-\clearpage
-\section{Vulkan}
-vulkan是控制GPU设备的API，相比OpenGL，由OpenGL驱动提供的功能都需要自己实现，包括，同步，进度，内存管理等。
-所以vulkan是适合大型复杂的图形渲染，定制性要求很高，OpenGL提供不了的功能。
-
+\input{subpart/instance.tex}
+\input{subpart/physically.tex}
 
 %-----其他
 \clearpage

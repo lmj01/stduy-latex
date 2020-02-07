@@ -1,0 +1,589 @@
+%%% Poster for ASE 2009 by Martin Weiglhofer
+
+\documentclass[final,hyperref={pdfpagelabels=false}]{beamer} 
+
+\mode<presentation> {  
+  \usetheme{TUGraz}    
+}
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath,amsthm, amssymb, latexsym}
+\usepackage{epsfig}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{algpseudocode}
+\usepackage{colortbl}
+\usepackage{booktabs}
+
+\newcommand{\Break}{\State{\textbf{break}}}
+
+\newcommand{\no}{\color{tugorange} \ding{55}}
+\newcommand{\yes}{\color{tuggreen} \ding{51}}
+
+\usepackage{tikz}
+\usepackage{pgflibraryshapes}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes}
+\usetikzlibrary{automata}
+\tikzstyle{model_node}=[circle,draw=black,fill=tuggreen!50,minimum size=50pt]
+\tikzstyle{tool}=[draw,double,rounded corners,inner sep=10pt]
+\tikzstyle{aut_node}=[circle,draw=black,fill=black,inner sep=0pt,minimum size=7pt,font=\footnotesize]
+
+\usefonttheme[onlymath]{serif}
+\boldmath
+\usepackage[orientation=portrait,size=a0,scale=1.4,debug]{beamerposter}                       
+
+
+\pgfdeclareimage[height=4cm]{institute-logo}{images/ist_logo}
+\logoleft{\pgfuseimage{institute-logo}\vspace*{-0.5cm}}
+
+\pgfdeclareimage[height=4cm]{university-logo}{images/logo}
+\logoright{\pgfuseimage{university-logo}}
+
+\institute[Institute for Software Technology] 
+{
+  Institute for Software Technology - Graz University of Technology
+}
+
+\date[ASE 2009] 
+{Automated Software Engineering 2009}
+
+\subject{ASE 2009}
+
+\title{Using Spectrum-based Fault Localization for Test Case Grouping}
+\author[Weiglhofer, Fraser \& Wotawa]{Martin Weiglhofer, Gordon
+  Fraser, and Franz Wotawa}
+\mail{\{weiglhofer,fraser,wotawa\}@ist.tugraz.at}
+\webpage{http://www.ist.tugraz.at/}
+
+\begin{document}
+
+\begin{frame}
+
+\centering
+\begin{block}{Problem}
+
+\begin{minipage}{0.64\paperwidth}
+\begin{itemize}
+  \item Automated model-based test case generation allows the generation
+    of arbitrary numbers of different test cases.
+  \item In model-based black-box testing many test cases often reveal
+    the same misbehavior (see table).
+  \item Under this light test result analysis become a tedious and time
+    consuming task. 
+  \item Our goal: \\\textbf{ Group test cases such that test cases of
+      one group most likely detected the same failure.}
+\end{itemize}
+\end{minipage}
+\qquad
+\begin{minipage}{0.29\paperwidth}
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    \multirow{2}{2.3cm}{Test Suite} & \multirow{2}{*}{Impl.} & No. Test &
+    \multicolumn{2}{c}{Verdicts} & \multirow{2}{4cm}{\centering Detected Failures} \\
+\cmidrule{4-5}
+                                &                        & Cases    &      Pass & Fail \\
+    \midrule
+    \multirow{2}{*}{A} & Commercial  & 6644 & 1700 & \cellcolor{tugorange} 4944 & \cellcolor{tugorange} 9 \\
+                       & Open Source & 6644 & 4587 & \cellcolor{tugorange} 2057 & \cellcolor{tugorange} 4 \\
+    \multirow{2}{*}{B} & Commercial  &  500 &  207 & \cellcolor{tugorange} 293  & \cellcolor{tugorange} 3 \\
+                       & Open Source &  500 &  237 & \cellcolor{tugorange} 263  & \cellcolor{tugorange} 5 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+\end{minipage}
+
+\end{block}
+
+\begin{block}{Our Approach}
+  We use spectrum-based fault localization (SFL,
+  e.g. see~\cite{abreu2007accuracy}) on the level of the
+  specification. SFL calculates the fault-likelihoods for different
+  blocks of the specification. Then we compute the similarity between
+  test runs w.r.t. these likelihoods, i.e. blocks with a higher
+  fault-likelihood have a higher impact on the similarity of test
+  runs.
+
+\vspace*{10mm}
+\begin{center}
+\begin{tikzpicture}[node distance=62mm]
+
+  \begin{scope}[node distance=35mm]
+    \node (mtext) at (3,2) {\centering \textbf{Model}}; 
+    \node at (0.85,0.8) (model_north) {};
+    \node at (2.3,0) (model_west) {};
+    \node[model_node] at (0,0) (s1) {};
+    \node[model_node] (s2) [below of=s1, right of=s1]{};
+    \node[model_node] (s3) [above right of=s2] {};
+    
+    \draw[->] (s1) to [bend left] (s2);
+    \draw[->] (s2) to [bend left] (s1);
+    \draw[->] (s1) to [bend left] (s3);
+    \draw[->] (s2) to [bend left] (s3);
+    \draw[->] (s3) to [bend left] (s2);
+  \end{scope}
+
+  \node[tool] (tcgen) [below of=s2]
+  { \begin{minipage}{4.5cm}
+      \centering
+      test case\\
+      generator
+    \end{minipage}
+  };
+
+
+  \node (testcases) [below of=tcgen,yshift=-60mm] {};
+  \begin{scope}[node distance=20mm, yshift=-110mm, xshift=-45mm]
+    \begin{scope}[xshift=-0.5cm,yshift=-5.2cm]
+      \foreach \x/\y/\xtext/\name/\yoffset/\graph in 
+      {
+        2/0//$tc_1$/1.8/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2){
+                  node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) {
+                    node [below] at (a3.north) {\tiny \yes} {
+                      node [below] at (a4.north) {\tiny \no} 
+                    }
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,7/0//$tc_2$/1.8/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2) {
+                  node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) {
+                    node [below] at (a3.north) {\tiny \yes} {
+                      node [below] at (a4.north) {\tiny \no} 
+                    }
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,12/0//$tc_3$/2/{
+          \node[aut_node] (a1) {} {
+            node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+              node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2) {
+                node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) {
+                  node [below] at (a3.north) {\tiny \yes} {
+                    node [below] at (a4.north) {\tiny \no} 
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,2/-5.8//$tc_4$/1.3/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a15) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a2) [below of=a15,node distance=6mm] {} edge (a15) {
+                  node[aut_node] (a25) [below of=a2,node distance=6mm] {} edge (a2) {
+                    node[aut_node] (a3) [below of=a25, left of=a25,node distance=6mm] {} edge (a25) {
+                      node[aut_node] (a4) [below of=a25, right of=a25,node distance=6mm] {} edge (a25) {
+                        node [below] at (a3.north) {\tiny \yes} {
+                          node [below] at (a4.north) {\tiny \no} 
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,7/-5.8//$tc_5$/1.3/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a15) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a2) [below of=a15,node distance=6mm] {} edge (a15) {
+                  node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2) {
+                    node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) {
+                      node[aut_node] (a5) [below of=a3, left of=a3,node distance=6mm] {} edge (a3) {
+                        node[aut_node] (a6) [below of=a3, right of=a3,node distance=6mm] {} edge (a3) {
+                          node [below] at (a5.north) {\tiny \yes} {
+                            node [below] at (a4.north) {\tiny \no} {
+                              node [below] at (a6.north) {\tiny \no} 
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,12/-5.8//$tc_6$/2.0/{
+          \node[aut_node] (a1) {} {
+            node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+              node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2) {
+                node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) {
+                  node [below] at (a3.north) {\tiny \yes} {
+                    node [below] at (a4.north) {\tiny \no} 
+                  }
+                }
+              }
+            }
+          };
+        }
+      }
+      {
+        \draw[shift={(\x,\y)},scale=3.8] (0.75,0) -- (0,0) -- (0,-1.35) --
+        (1,-1.35) -- (1,-0.25) -- (0.75,-0.25) -- (0.75,0) --
+        (1,-0.25);
+        \node[shift={(\x+3,\y)}] at (0,0) (n1) [anchor=north east] 
+        {\begin{minipage}{1.5cm}\centering \scriptsize \name\end{minipage}};
+        
+        \begin{scope}[shift={(\x+1.8,\y-\yoffset)}]
+          \graph
+        \end{scope}
+      };
+    \end{scope}
+    \end{scope}
+
+
+  \node[tool] (tcexec) [right of=testcases,  node distance=200mm] 
+  {\begin{minipage}{4.5cm}
+      \centering
+      test case\\
+      executor
+    \end{minipage}
+  };
+
+  \node[fill=gray,text=white,inner sep=1cm] (iut) [below of=tcexec,node distance=70mm] {\textbf{IUT}};
+
+  \begin{scope}[xshift=150mm, yshift=15mm]
+    \begin{scope}[xshift=-0.5cm,yshift=-5.2cm]
+\foreach \x/\y/\xtext/\name/\yoffset/\graph in 
+      {
+        2/0/\yes/$tc_1$/1.8/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a3) [below of=a2, left of=a2,node distance=6mm] {} edge (a2)% {
+              }
+            }
+          };
+        }
+        ,7/0/\no/$tc_2$/1.8/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                  node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) %{
+              }
+            }
+          };
+        }
+        ,12/0/\no/$tc_3$/2/{
+          \node[aut_node] (a1) {} {
+            node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) % {
+            }
+          };
+        }
+        ,2/-5.8/\yes/$tc_4$/1.3/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a15) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a2) [below of=a15,node distance=6mm] {} edge (a15) {
+                  node[aut_node] (a25) [below of=a2,node distance=6mm] {} edge (a2) {
+                    node[aut_node] (a3) [below of=a25, left of=a25,node distance=6mm] {} edge (a25) % {
+                  }
+                }
+              }
+            }
+          };
+        }
+        ,7/-5.8/\no/$tc_5$/1.3/{
+          \node[aut_node] (a0) {} {
+            node[aut_node] (a1) [below of=a0,node distance=6mm] {} edge (a0) {
+              node[aut_node] (a15) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a2) [below of=a15,node distance=6mm] {} edge (a15) {
+                    node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) % {
+                }
+              }
+            }
+          };
+        }
+        ,12/-5.8/\no/$tc_6$/2.0/{
+          \node[aut_node] (a1) {} {
+            node[aut_node] (a2) [below of=a1,node distance=6mm] {} edge (a1) {
+                node[aut_node] (a4) [below of=a2, right of=a2,node distance=6mm] {} edge (a2) % {
+            }
+          };
+        }
+      }
+      {
+        \draw[shift={(\x,\y)},scale=3.8] (0.75,0) -- (0,0) -- (0,-1.35) --
+        (1,-1.35) -- (1,-0.25) -- (0.75,-0.25) -- (0.75,0) --
+        (1,-0.25);
+        \node[shift={(\x+3,\y)}] at (0,0) (n1) [anchor=north east] 
+        {\begin{minipage}{1.5cm}\centering \scriptsize \name \\ \huge \xtext \end{minipage}};
+        
+        \begin{scope}[shift={(\x+1.8,\y-\yoffset)}]
+          \graph
+        \end{scope}
+      };
+    \end{scope}
+  \end{scope}
+
+  \node[tool] (coverage) [above of=tcexec, node distance=660] 
+  {\begin{minipage}{130mm}
+      \begin{center}\textbf{Model Coverage}\end{center}
+      \small Derive for each executed path the hit coverage items
+      (e.g. lines, conditions).
+    \end{minipage}};
+
+  \node (m4) [right of=coverage, node distance=220mm, anchor=north, yshift=30mm] 
+{
+\small
+    \begin{tabular}{clcccccclc}
+      \hline
+      Executed & & \multicolumn{6}{c}{Coverage Items} & & \multirow{2}{*}{Verdict}\\
+      \cline{3-8}
+      Paths & & 1 & 2 & 3 & 4 & 5 & 6 & & \\
+      \hline
+        $tc_1$  & & 0 & 1 & 0 & 1 & 1 & 0 & & \yes \\
+        $tc_2$  & & 0 & 1 & 1 & 1 & 0 & 0 & & \no \\
+        $tc_3$  & & 0 & 1 & 1 & 0 & 0 & 0 & & \no \\
+        $tc_4$  & & 0 & 1 & 0 & 1 & 1 & 0 & & \yes \\
+        $tc_5$  & & 0 & 1 & 0 & 1 & 0 & 1 & & \no \\
+        $tc_6$  & & 0 & 1 & 1 & 0 & 0 & 0 & & \no \\
+      \hline
+      fault- & &\multirow{2}{*}{0.0}&\multirow{2}{*}{0.8}&\multirow{2}{*}{0.8}&\multirow{2}{*}{0.5}&\multirow{2}{*}{0.0}&\multirow{2}{*}{0.5} \\
+    likelihood & & \\
+      \hline
+    \end{tabular}
+};
+
+  \node[draw=gray] (calcOchiai) [right of=coverage, node distance=430mm, anchor=north, yshift=25mm]
+{
+  \begin{minipage}{165mm}
+\footnotesize
+$$
+\frac{a_{1\text{\no}}(c)}{\sqrt{(a_{1\text{\no}}(c)+a_{0\text{\no}}(c))*(a_{1\text{\no}}(c) + a_{1\text{\yes}}(c))}}
+$$
+where
+\begin{eqnarray*}
+a_{1\text{\no}}(c) & = |\{r | x_{r,c} = 1 \wedge Verdict_{r} = \text{\no}\}| \\
+a_{0\text{\no}}(c) & = |\{r | x_{r,c} = 0 \wedge Verdict_{r} = \text{\no}\}| \\
+a_{1\text{\yes}}(c) & = |\{r | x_{r,c} = 1 \wedge Verdict_{r} = \text{\yes}\}| 
+\end{eqnarray*}
+and $x_{r,c}$ denotes the element at row $r$ and column $c$ of the
+table.
+  \end{minipage}
+};
+
+  \draw[->,overlay,red,ultra thick] (512mm,-70mm) to [looseness=2.0,out=0,in=220] (calcOchiai.west);
+
+  \node[draw=gray] (calculationx) [right of=coverage, node distance=430mm, anchor=north, yshift=-90mm] 
+{
+\begin{minipage}{165mm}
+\footnotesize
+
+\begin{center}
+    \begin{tabular}{clcc>{\columncolor{tugorange}[0pt]}c>{\columncolor{tugorange}[0pt]}cc>{\columncolor{tugorange}[0pt]}c}
+      \hline
+        $tc_5$  & & 0 & 1 & 0 & 1 & 0 & 1 \\
+        $tc_6$  & & 0 & 1 & 1 & 0 & 0 & 0 \\
+     \hline
+       fault- & &\multirow{2}{*}{0.0}&\multirow{2}{*}{0.8}&\multirow{2}{*}{\cellcolor{block body.bg}0.8}&\multirow{2}{*}{\cellcolor{block body.bg}0.5}&\multirow{2}{*}{0.0}&\multirow{2}{*}{\cellcolor{block body.bg}0.5} \\
+     likelihood & & \\
+      \hline
+    \end{tabular}
+\end{center}
+\vspace*{10mm}
+    \begin{eqnarray*}
+      s(tc_5,tc_6) &=& 1 - \frac{0.8+0.5+0.5}{\Sigma (\text{fault-likelihood})} \\
+      &=& 1 - \frac{1.8}{0.8+0.8+0.5+0.5} \\
+      &=& \colorbox{tuggreen}{0.305}
+    \end{eqnarray*}
+\end{minipage}
+};
+
+  \draw[->,overlay,red,ultra thick] (677mm,-120mm) -- (669mm,-140mm);
+  \draw[->,overlay,red,ultra thick] (693mm,-120mm) -- (693mm,-140mm);
+  \draw[->,overlay,red,ultra thick] (719mm,-120mm) -- (717mm,-140mm);
+
+  \draw[->,overlay,red,ultra thick] (500mm,-190mm) to [looseness=1.0,out=0,in=200] (calculationx.west);
+
+  \node (similarity) [below of=m4, node distance=140mm]
+{
+\begin{minipage}{100mm}
+  \textbf{Similarity Values}\\\\
+  \small
+  \begin{tabular}{c|ccc}
+        & $tc_3$     & $tc_5$     & $tc_6$ \\
+\hline
+      $tc_2$ & 0.814 & 0.491 & 0.814\\
+      $tc_3$ &       & 0.491 & 1.000\\
+      $tc_5$ &       &       & \cellcolor{tuggreen} 0.305\\
+    \end{tabular}
+\end{minipage}
+};
+
+
+  \node[tool] (groupalg) [below of=similarity, node distance=100mm]
+  {\begin{minipage}{130mm}
+      \begin{center}\textbf{Test Case Grouping}\end{center}
+      \small A test case $tc$ is added to a group if the similarity
+      between any test case of the group and $tc$ is above the threshold.
+    \end{minipage}};
+
+  \node       (threshold) [left of=groupalg, node distance=120mm, anchor=center] 
+  {\begin{minipage}{50mm}\centering Similarity Threshold\\\small(e.g. 0.8)\end{minipage}};
+
+  \node[ellipse,draw=black] (result) [right of=groupalg, node distance=200mm] 
+  {
+    \begin{minipage}{100mm}
+      \begin{center}\textbf{Result}\end{center}
+      Group 1: $tc_2$ $tc_3$ $tc_6$\\
+      Group 2: $tc_5$
+    \end{minipage}
+  };
+  
+  \pgfsetendarrow{\pgfarrowsingle}
+  \draw[ultra thick] (s2.south)++(0,-5mm) -- (tcgen.north);
+  \draw[ultra thick] (testcases.east)++(80mm,0) -- (tcexec.west);
+  \draw[ultra thick] (tcexec.north) -- ++(0,40mm) node [anchor=west, midway] 
+  {\begin{minipage}{80mm}\flushleft executed paths and verdicts\end{minipage}};
+  \draw[ultra thick] (coverage.east) -- ++(55mm,0);
+  \draw[ultra thick] (m4.south) -- (similarity.north);
+  \draw[ultra thick] (threshold.east) -- (groupalg.west);
+  \draw[ultra thick] (similarity.south) -- (groupalg.north);
+  \draw[ultra thick] (groupalg.east) -- (result.west);
+
+  \pgfsetstartarrow{\pgfarrowsingle}
+  \draw[ultra thick] (iut) -- (tcexec);
+  \pgfsetendarrow{}
+  \draw[ultra thick] (testcases.north)++(0,60mm) -- (tcgen.south);
+  \draw[ultra thick] (coverage.south) -- ++(0,-25mm);
+  \draw[ultra thick] (coverage.west) -- ++(-80mm,0);
+  \pgfsetstartarrow{}
+
+
+\end{tikzpicture}
+\end{center}
+\end{block}
+
+  \begin{minipage}{0.395\textwidth}
+    \begin{block}{Experimental Setup}
+      \begin{itemize}
+      \item System under test: Registrar entity of the Session
+        Initiation Protocol~\cite{rfc3261sip}. 
+      \item Formal model: {\sc lotos} (process algebra)
+        specification. 
+      \item Test Suites:
+        \begin{itemize}
+          \item Test Suite A came from \cite{aichernig2007protocol}
+          \item Test Suite B: 500 randomly generated test cases
+          \end{itemize}
+      \item Coverage Criteria:
+        \begin{itemize}
+          \item process coverage, action coverage, decision coverage
+              and condition coverage
+         \end{itemize}
+      \item Distribution of the failed test cases over the detected failures:
+      \begin{center}
+        \epsfig{file=images/faultdist,width=0.73\columnwidth}
+      \end{center}
+      \end{itemize}
+    \end{block}
+\end{minipage}
+\quad
+\begin{minipage}{0.585\textwidth}
+\newcommand{\mysp}{{\color{block body.bg}0}}
+    \begin{block}{Some Results {\color{block title.bg}p}}
+\begin{center}
+  \begin{tabular}{ccp{10mm}ccccp{12mm}cccc}
+  \toprule
+   \multicolumn{1}{c}{\multirow{3}{25mm}{\centering Test Suite}} & 
+   \multicolumn{1}{c}{\multirow{3}{45mm}{\centering Coverage Item}} && 
+   \multicolumn{4}{c}{Commercial SIP Registrar} &&
+   \multicolumn{4}{c}{Open Source SIP Registrar} \\
+   \cmidrule{4-7} \cmidrule{9-12}
+   &&& 
+      \multirow{2}{42mm}{\centering Failed TCs} & 
+      \multirow{2}{33mm}{\centering Fail\-ures} &
+      \multirow{2}{40mm}{\centering No. Groups} & 
+      \multirow{2}{45mm}{\centering Identified Failures} 
+   && 
+      \multirow{2}{42mm}{\centering Failed TCs} & 
+      \multirow{2}{33mm}{\centering Fail\-ures} &
+      \multirow{2}{40mm}{\centering No. Groups} & 
+      \multirow{2}{45mm}{\centering Identified Failures} 
+   \\\\
+  \midrule
+  \multicolumn{1}{c}{\multirow{4}{10mm}
+  {\begin{center}A\end{center}}} 
+                  &   Process   && 4944 & 9 & \mysp5 & 1 && 2057 & 4 & \mysp5 & 1 \\
+                  &   Action    && 4944 & 9 &     18 & 5 && 2057 & 4 &     17 & 4 \\
+                  &   Decision  && 4944 & 9 &     26 & 6 && 2057 & 4 &     25 & 4 \\
+                  &   Condition && 4944 & 9 &     43 & 9 && 2057 & 4 &     39 & 4 \\
+  \midrule
+  \multirow{4}{10mm}
+  {\begin{center}B\end{center}}  
+                  &   Process    && 293 & 3 & \mysp1 & 1 && 263 & 5 & \mysp5 & 2 \\ 
+                  &   Action     && 293 & 3 &     21 & 3 && 263 & 5 &     27 & 5 \\ 
+                  &   Decision   && 293 & 3 &     24 & 3 && 263 & 5 &     27 & 5 \\ 
+                  &   Condition  && 293 & 3 &     35 & 3 && 263 & 5 &     47 & 5 \\ 
+  \bottomrule
+  \end{tabular}
+  \vspace*{8mm}
+  \end{center}
+  \begin{itemize}
+    \item Column \emph{Test Suite}: Name of the Test Suite.
+    \item Column \emph{Coverage Item}: Used coverage criterion for calculating
+      the hit matrix.
+    \item Column \emph{Failed TCs}: Number of failed test cases.
+    \item Column \emph{Failures}: The number of failures that were
+      revealed by the failed test cases.
+    \item Column \emph{No. Groups}: The number of groups generated by
+      our approach.
+    \item Column \emph{Identified Failures}: The number of failures
+      that were identified when analyzing only one test case per
+      group.
+  \end{itemize}
+  \end{block}
+  \end{minipage}
+
+\begin{minipage}{0.64\textwidth}
+  \begin{block}{Some References}
+    \bibliographystyle{IEEEtran}
+    \bibliography{ase2009}  
+  \end{block}
+\end{minipage}
+\quad
+  \begin{minipage}{0.34\textwidth}
+   \begin{alertblock}{\textbf{At a glance}}
+    \begin{itemize}
+    \item Problem: in model-based testing many test cases often reveal
+      the same failure.
+      \item Idea: group test cases based on their similarity.
+      \item Results: for our case study we observed an average
+        reduction of 92\% in the number of test cases to be analyzed.
+    \end{itemize}
+  \end{alertblock}
+  \end{minipage}
+
+
+\end{frame}                                            
+\end{document}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-PDF-mode: t
+%%% End: 

@@ -1,0 +1,47 @@
+\clearpage
+\part{ECMAScript}
+
+European Computer Manufacturers Association制定ECMA-262标准化的脚本程序语言
+
+\section{JavaScript}
+
+\subsection{标准}
+\begin{itemize}
+    \item {1998, 2.0}
+    \item {1999, 3.0}
+    \item {2007, 4.0}
+    \item {2009, 5.0}
+    \item {2015, 6.0}
+\end{itemize}
+
+\subsection{Execution Contexts}
+ECMAScript的规范中说，at any point in time, there is at most one execution context per agent
+that is actually executing code.
+下面这段参考了Vue的文档描述的关系进行整理的。
+JS是执行是单线程的，它是基于事件循环的，大致分为以下几个步骤：
+\begin{itemize}
+    \item {1, 所有同步任务都在主线程上执行，形成一个执行栈execution context stack}
+    \item {2, 主线程之外，还存在一个任务队列task queue，异步任务完成后就产生一个事件放在队列中}
+    \item {3, 一旦执行栈中的所有同步任务执行完毕，就去处理任务队列，执行队列等待的任务}
+    \item {4, 主线程不断重复上面的过程}
+\end{itemize}
+主线程执行的就是一个tick过程，而异步就是一个task，规范中规定task为两大类：
+\begin{itemize}
+    \item {macro task, 宏任务, setTimeout, MessageChannel, postMessage, setImmediate}
+    \item {micro task, 微任务, MutationObserver, Promise.then}
+\end{itemize}
+它们执行逻辑顺序如下，处理完一个宏任务就需要把所有的微任务处理掉！宏任务的耗时
+大于微任务耗时，在浏览器上优先使用微任务，再使用宏任务，且各个浏览器的支持也不一致，
+可能存在偏差。
+\begin{lstlisting}
+    for (marcoTask of marcoTaskQueue) {
+        handleMacroTask();
+        for (microTask of microTaskQueue) {
+            handleMicroTask(microTask);
+        }
+    }
+\end{lstlisting}
+在ECMAScript2018的规范中说Agent属于一个running execution context。task对应的是job概念。
+
+JavaScript, TypeScript, AssemblyScript
+

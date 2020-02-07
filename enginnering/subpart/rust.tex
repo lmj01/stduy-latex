@@ -1,0 +1,66 @@
+\clearpage
+\part{Rust}
+
+Rust programming language
+
+\section{特性}
+
+\subsection{类型系统}
+借鉴了Haskell的类型系统特性有
+\begin{itemize}
+    \item {没有空指针}
+    \item {默认不可变}
+    \item {代数数据类型}
+    \item {高阶函数}
+    \item {模式匹配}
+    \item {trait和关联类型}
+    \item {本地类型推导}
+\end{itemize}
+借鉴了C++的
+\begin{itemize}
+    \item {确定性析构}
+    \item {RAII}
+    \item {智能指针}
+\end{itemize}
+加上本身独有的特性
+\begin{itemize}
+    \item {仿射类型Affine Type，用来表达Rust所有权中的move语义}
+    \item {借用，生命周期}
+\end{itemize}
+
+\subsection{生命周期}
+很重要的概念就是生命周期，所有权和移动语义，借用概念。相比C/C++中的默认拷贝赋值，rust中不注意调用一下自己就没啦！
+默认情况下是移动语义，很多时候要强调是借用，就像C的指针，C++的引用一样，使用起来时要注意这些基础的概念，是很容易
+影响写代码的逻辑的。
+
+struct中很重要的概念是生命周期，结构体中的每个字段都是完整的属于自己的，即每个字段的生命周期最终都不会超过
+这个结构体。
+\begin{lstlisting}
+    struct A {
+        attr1: i32,
+        attr2: String,
+    }
+    struct RefBoy<'a> {
+        local:&'a i32,
+    }
+\end{lstlisting}
+RefBoy的生命期一定不能比'a更长，即结构体里的引用必须要有显式生命周期，一个辈显式写出的生命周期的结构体，其自身
+的生命周期一定小于等于其显式写出的任意一个生命周期。
+
+\subsection{注解}
+作为新一代的编程语言，注解这种形式的组织代码已经是必备的功能了，不过会发现rust的
+注解上更加灵活些
+\begin{lstlisting}
+    #[derive(Debug)]
+    struct Rectangle {
+        width: u32,
+        height: u32,
+    } 
+    fn main() {
+        let rect1 = Rectangle { width: 30, height: 40};
+        println!("rect1 is {:?}", rect1);
+    }
+\end{lstlisting}
+这里增加注解来派生Debug trait，使用调试格式打印Rectangle实例。
+
+\subsection{宏}

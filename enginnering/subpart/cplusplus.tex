@@ -1,0 +1,121 @@
+\clearpage
+\part{Cplusplus}
+
+\subsection{Cplusplus}
+C++引入一个核心概念ADT，Abstract Data Type.是为类型的属性和类型的操作方法提供了一个抽象
+的描述，且不受特定的实现和编程语言的约束。C++使用class关键字来封装数据和函数方法。
+
+\subsubsection{对象模型}
+对象模型的发展有几个阶段，分别是
+
+Simple Object Model，所有的member都不放在object中，只保存指向member的指针。这个模型
+抽象得太理想，很容易理解，但实际中没有应用。
+
+Table-driven Object Model，是为了对所有class的对象object都有一致的表达方式，让object
+内含两个表格指针，分别指向
+\begin{itemize}
+    \item {member data table}
+    \item {function member table}
+\end{itemize}
+
+C++的实际模型是继承了简单对象模型和表格驱动模型的优点，满足在空间和存取的时间效率，
+缺点也存在，就是class内的一些改动就会导致需要重新编译，影响开发效率。模型结构大致如下：
+\begin{itemize}
+    \item {non-static data member, 都在class之内}
+    \item {static data member，都在class之外}
+    \item {function member都在class之外}
+    \item {virtual function，与其他不同。每个class有多个指向virtual function的指针，都放在
+    一个表格中，称为virtual table（vtbl），每个class内含一个指针指向这个virtual table， 这个指针
+    称为vptr}
+\end{itemize}
+
+\subsubsection{成员函数}
+构造函数，只在特定情况下会由编译器构建：
+\begin{itemize}
+    \item {class A中的member是class B的对象，B有默认构造函数，编译器会给A生成一个默认构造函数，
+    用来调用成员class B的对象的初始化，其他member是不会自动初始化的，是程序员的负责对它们进行初始化。
+    需要避免多个默认构造函数，使用inline}
+    \item {class A的基类有默认构造函数，编译器会生成A的默认构造函数，以调用基类的默认构造函数来完成
+    初始化。如果基类没有，编译器不会为A生成默认构造函数}
+    \item {class A存在虚函数，编译器会默认生成构造函数，构造vtbl和vptr}
+    \item {class A存在虚基类，编译器会生成默认构造函数，以初始化虚基类的vtbl}
+\end{itemize}
+
+拷贝构造函数，在以下情况下会由编译器生成，
+\begin{itemize}
+    \item {显示对class A进行初始化}
+    \item {class A作为函数的参数}
+    \item {函数返回一个class A}
+\end{itemize}
+位逐次拷贝，bitwise copy semantics。即class A中不存在class member对象时，拷贝就是对class
+A中的每个bit进行拷贝，即POD（Plain Old Data），这时支持static initializtion，内存布局和对应的
+C语言的struct布局相同。
+
+\subsubsection{多态机制}
+case这个概念是一种编译器指令，它只影响编译器如何解释指针指向的内存大小和内容。
+
+\subsubsection{struct}
+很多适合并没有弄明白C++中的struct和C中的struct的区别，听到更多的是以C++中的概念来理解。
+\begin{lstlisting}
+    struct S1 {
+        int member;
+    };
+    S1 s1; // variable declare
+    struct S2 {
+        int member;
+    }S2; // S2 is a variable, directly
+    S2.member = 1; // directly access the global value
+    typedef struct tagS3 {
+        int member;
+    }S3; // S3 is structure type
+    S3 s3; // declare variable 
+    s3.member; 
+\end{lstlisting}
+
+\subsubsection{value-category}
+C++的表达式具有两个属性，一个是type，一个是value category，判断一个表达式的特征就是参考value-category
+来确定的。
+
+C++11之前，只有两类，lvalue和rvalue，即根据赋值符合的左右来区分，左值是表达式结束运算后
+依然存在的持久对象，右值是表达式结束后就不再存在的临时对象。
+
+C++11开始，引入了移动语义move semantic后，产生了语义上需要。\textbf{注意，计算机语言是计算机科学与语言学的
+交叉科目，很多概念来自语言学内容}。先从自然语言中举个例子来说明
+\begin{enumerate}
+    \item {他是饭桶}
+    \item {这是饭桶}
+\end{enumerate}
+上面两句话都有饭桶这个词，但是意思是不一样的，语法形式上相同的语句，却因代词不同结构完全无关。
+说明一条语句不能仅靠词来确定，还需要整个句子的逻辑性，语义性。C++中也有类似的表达式：
+\begin{enumerate}
+    \item {vec = vect<int>()}
+    \item {vec = another-vec}
+\end{enumerate}
+形式也是一样，但第一句的语义是表示移动赋值，第二句的语义表示复制拷贝一份。所以在C++11中，重新
+定义了value categories：
+\begin{itemize}
+    \item {是否具有identity，即是否可以与另一个表达式进行比较，具有identity同一性的才具有比较
+    的意义，如内存地址，堆栈上的变量都具有identity}
+    \item {是否呈现移动的语义}
+    \begin{itemize}
+        \item {lvalue, 有identity且无移动语义}
+        \item {xvalue，有identity且有移动语义}
+        \item {prvalue，pure rvalue，无identity且有移动语义}
+        \item {glvalue，有identity的表达式}
+        \item {rvalue，有移动语义的表达式。如对象成员表达式，object.member,如果member是枚举或非
+        静态成员函数，则object.member就是prvalue。因为枚举编译后是要给具体的数字，如5，成员函数
+        在编译后是一个相对地址，本质上也是一个具体的数字，CPU使用这些数字时，是直接放在指令内部或
+        寄存器中，不会放在内存中，即没有identity}
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{CRTP}
+Curiously Recurring Template Pattern,奇异递归模板模式。1980年作为F-bound polymorphic
+被提出
+\begin{itemize}
+    \item {静态的多态，无法动态绑定。CRTP强迫继承接口，可与Concept这个概念结合来理解}
+    \item {多态的转换调用是在编译期时解决，而不是留到运行期处理，性能得到提高。CRTP起到了虚函数的效果，
+    却无虚函数的开销，因为虚函数需要存储虚函数指针，调用时通过虚函数指针查找虚函数表进行调用}
+    \item {std::enable\_shared\_from\_this针对std::shared\_ptr就是实例，WTL微软的轻量级窗体库}
+\end{itemize}
+
