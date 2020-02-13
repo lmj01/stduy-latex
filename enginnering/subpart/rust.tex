@@ -5,6 +5,60 @@ Rust programming language
 
 \section{特性}
 
+Rust有很多特性是非常现代化的，把数据类型与实现分离的逻辑
+\begin{lstlisting}
+    #[derive(Debug)]
+    struct Rectangle {
+        width: u32,
+        height: u32,
+    }
+    impl Rectangle {
+        fn area(&self) -> u32 {
+            self.width * self.height;
+        }
+    }
+\end{lstlisting}
+可以看到，struct中的只有属性，所有方法都放在impl模块中去完成，这种解耦相比其他的OOP来说
+是非常好的优点。
+
+\subsection{语法}
+
+\subsubsection{自动引用和解引用}
+automatic referencing and dereferencing, 
+相比C/C++的直接和指针调用方法需要手动转换类型，Rust根据self类型自动推断出调用方法时的类型需要
+
+\subsubsection{enumerations}
+
+枚举，允许通过列举成员variants来定义一个类型， Rust的枚举与F\#、OCaml、Haskell等函数式编程
+语言中的代数数据类型algebraic data types相似。
+
+与C/C++的struct相比，Rust的enum可以有类似struct的功能，可对任意类型进行绑定
+如标准库中的IpAddr
+\begin{lstlisting}
+    struct Ipv4Addr {
+        // ---snip---
+    }
+    struct Ipv6Addr {
+        // ---snip---
+    }
+    enum IpAddr {
+        V4(Ipv4Addr),
+        V6(Ipv6Addr),
+    }
+\end{lstlisting}
+
+Rust没有空值null的概念，通过枚举Option来表示有值和没值，在逻辑表达上具有一直的接口
+\begin{lstlisting}
+    enum Option<T> {
+        Some(T),
+        None,
+    }
+\end{lstlisting}
+通过match语法来使用enum是非常好的方案，因为额外一层来封装保证接口的一直，所以T类型值是不能
+直接获取的。而match使用匹配模式来执行代码，模式可由字面值、变量、通配符和许多其他内容构成。
+且Rust的匹配是穷尽的exhaustive，即必须穷举完所有情况，不会出现空的。rust提供了通配符 \_ 来处理。
+
+
 \subsection{类型系统}
 借鉴了Haskell的类型系统特性有
 \begin{itemize}
@@ -27,6 +81,11 @@ Rust programming language
     \item {仿射类型Affine Type，用来表达Rust所有权中的move语义}
     \item {借用，生命周期}
 \end{itemize}
+
+\subsubsection{泛型}
+Rust通过在编译时进行泛型代码的单态化monomorphization来保证效率，
+单态化是一个通过填充编译时使用的具体类型，将通用代码转换为特定代码的过程。
+
 
 \subsection{生命周期}
 很重要的概念就是生命周期，所有权和移动语义，借用概念。相比C/C++中的默认拷贝赋值，rust中不注意调用一下自己就没啦！
