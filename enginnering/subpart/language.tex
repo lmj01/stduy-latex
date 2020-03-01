@@ -4,9 +4,9 @@
 编程语言是工具，是服务于软件工程的最基本的工具。针对不同的需要才会产生对应的语言工具，
 没有一种语言是万能的，是通用的，每一门编程语言都是特定领域的特定产物。
 
-\section{通用概念}
+\chapter{通用概念}
 
-\subsection{异常}
+\section{异常}
 异常，一般指程序运行期发生的非正常情况，一般是不可预测的，如内存不足，除零等。
 它与软件编程思想、编程语言的发展是与时俱进的，核心思想就是把功能代码模块与系统中
 可能出现的错误处理代码分离开来,以此达到代码组织结构更加美观、逻辑清晰,
@@ -178,6 +178,27 @@ C++中的模板与重载是静态多态，在编译期完成模板展开，直�
 
 Rust中引入的trait系统解决了C++中的缺点。
 
+\subsection{Attribut}
+
+属性规范\cite{ECMA334} Meta Item Attribute Syntax
+
+\begin{tabular}{|c|c|}
+    \hline
+    Style & Example \\ \hline
+    \hbox{Meta Word} & \hbox{no\_std} \\ \hline
+    \hbox{Meta Name Value Str} & \hbox{doc="example"} \\ \hline
+    \hbox{Meta List Path} & \hbox{allow(unused, clippy::inline\_always} \\ \hline
+    \hbox{Meta List Idents} & \hbox{macro\_use(foo,bar)} \\ \hline
+    \hbox{Meta List Name Value Str} & \hbox{link(name="CoreFoundation", kind="framework")} \\ \hline
+\end{tabular}
+
+所有属性语法都是以上的一种或其组合。一个属性必然是下面两种之一，在预处理过程中有不同的行为：
+
+\begin{description}
+    \item [active] \text{在处理属性的过程中，删除它们自己，留下所作用的元素}
+    \item [insert] \text{在处理属性的过程中，保留它们自己}
+\end{description}
+
 \subsubsection{修饰器Decorator}
 用来修饰类，改变类的行为的。是代码编译时发生的，而不是在运行时，即在编译期阶段
 就执行修饰器的作用。动态语言有这个特性，是让编译期来自动处理一些操作，比起静态
@@ -246,7 +267,7 @@ glue code language，胶水语言，
 \end{itemize}
 
 
-\section{计算机组织结构}
+\chapter{计算机组织结构}
 目前接触到的都是冯诺依曼体系结构的计算机，它也是现代计算机的产生的基础。
 \subsection{CPU}
 LSB-least significant bit最低位放在第0位，MSB-most significant bit，最高位放在第0位。
@@ -315,17 +336,17 @@ CPU 只负责运算，不负责存储数据，是LOAD-COMPUTE-SAVE原语模型�
 而想Java或其他语言，有GC的，基本都是在堆上的内存申请。
 rust能到达C的性能，是满足了零抽象，不像C++那样有虚函数的开销，实用性得到满足了。
 
-\section{编译器}
+\chapter{编译器}
 编译器的技术就是翻译人与机器的沟通，体现在两方面，一是工程化需要，需要大量的交流，不能简简单单的操作硬件来完成；
 一是简化人的交流成本，特别在指定领域，快速的结果是推导前进的基础。
 
-\subsection{概念}
+\section{概念}
 
-\subsubsection{自举}
+\subsection{自举}
 用低级语言先实现一个简单的编译器,然后用这个编译器的语言再去编写一个更高级的编译器.
 新编译器就是旧编译器的扩展,这个过程称为自举.
 
-\subsubsection{交叉编译}
+\subsection{交叉编译}
 不是每个设备都像PC这样便利，为其他设备进行软件开发的过程需要的技术。分两类
 \begin{itemize}
     \item {\textbf{小设备},如嵌入式或手机,在PC上完成编译过程,把打包的二进制放入小设备内存中运行.
@@ -334,7 +355,7 @@ rust能到达C的性能，是满足了零抽象，不像C++那样有虚函数的
     具有生成目标设备上的机器代码的功能}
 \end{itemize}
 
-\subsubsection{JIT}
+\section{JIT}
 Just In Time,即时编译，混合了静态编译与动态解释，将频繁执行的代码编译成机器码缓存起来，对于执行一次的代码任然是
 逐行逐条解释执行的技术。
 \newline
@@ -345,9 +366,11 @@ Just In Time,即时编译，混合了静态编译与动态解释，将频繁执�
 \end{itemize}
 \textbf{Trace JIT}, 跟踪即时编译，如Lua，相比Method JIT，它不检测和优化热点函数，而是检测并优化热点跟踪或执行路径。
 
-\subsection{GC}
+\section{GC}
+
 Garbage Collection
-\subsubsection{mark-and-sweep}
+
+\subsection{mark-and-sweep}
 系统管理所有创建的对象，每个对象都有对其他对象的引用，root集合代表着已知的系统级别的对象引用。从root集合出发，就可以访问
 到系统引用的所有对象，而没有被访问的对象就是垃圾对象，需要被销毁的，状态分为
 \begin{itemize}
@@ -376,12 +399,12 @@ Garbage Collection
     }
 \end{lstlisting}
 
-\subsection{BNF}
+\section{BNF}
 Backus-Naur Form巴科斯范式，用来描述计算机语言语法的符号集，是一种典型的元语言，它严格地表示语法规则，
 且描述的语法与上下文无关的,它的扩展是ABNF 
 \cite{ABNF}
 
-\subsubsection{expression}
+\subsection{expression}
 表达式在编程语言中代表一个可以返回值的语法单位，在不同语言中有不同的形式：
 \begin{itemize}
     \item {函数式编程语言，大多数语句都是表达式}
@@ -389,5 +412,5 @@ Backus-Naur Form巴科斯范式，用来描述计算机语言语法的符号集�
     \item {常量表达式，在BNF中属于终结符}
 \end{itemize}
 
-\subsection{工具}
+\section{工具}
 Lex \& Yacc是一套生成语法的工具，可以快速方便成型。相对于手写的词法器，具有一定的优势。

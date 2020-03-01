@@ -1,11 +1,63 @@
 \clearpage
-\part{ Physically }
+\part{Physically}
 
 物理学在图形学的意义是非常重要的
 
-\subsection{Physical Simulation}
+\chapter{Physical Terminology}
 
-\subsubsection{Material Point Method}
+\section{anisotropy}
+各向异性或非均向性，指物体的全部或部分属性性质随方向的不同有不同的变化
+
+在计算机图形学中，各向异性表面在围绕几何法线旋转时外观会发生变化。
+
+任何具有细粒度的东西，会产生影响外观的作用。
+
+\subsection{anisotropy reflect}
+基于反射表面上存在的小凹槽或凸起，改变光源照射物体的方向，反射在各个方向上具有不同的特性。
+
+可用来平滑图像，克服高斯模糊的缺陷。
+
+\subsection{isotropy reflect}
+表面反射均匀具有模糊效果， 反射总是在与颗粒相反的方向拉伸。
+
+\section{Reflectance}
+
+反射率，是用来衡量物质反射能力的量，定义为物体表面反射能量与达到物体表面入射能量的比率。反射率是波长的函数，
+指某段波长向一定方向的反射，不同波长就有不同的反射率。
+\begin{align*}
+    \phi(\lambda) = \frac{E_{R}(\lambda)}{E_{I}(\lambda)} = \frac{\pi L(\lambda)}{E_{I}(\lambda)}
+\end{align*}
+
+\section{Albedo}
+
+反照率，指地表在太阳辐射的影响下，反射辐射通量与入射辐射通量的比值。albedo是对全波段的，是反射率在所有方向上的积分。
+
+\begin{align*}
+    \alpha = \frac{M}{E}
+\end{align*}
+
+\subsection{White Sky Albedo}
+
+WSA,白空反照率，指忽略太阳直射辐射，只考虑地物对大气散射辐射的反射情况。
+
+\subsection{Black Sky Albedo}
+
+BSA，黑空反照率。指忽略大气散射，只考虑地物对太阳直射，入射，辐射的反射情况
+
+\subsection{Blue Sky Albedo}
+
+地物真实反照率，又称为蓝空反照率，或半球-半球反射率BHR
+
+\begin{align*}
+    BHR \approx (1-s)WSA + sBSA 
+\end{align*}
+
+其中s是天空散射光比例。
+
+
+\chapter{Physical Simulation}
+
+\section{Material Point Method}
 
 物质点法，是一种模拟连续介质的方法，最早被Sulkey等人在1995年发明。
 与有限元相比，可以把MPM里面的grid nodes对应到FEM中的DOFs，
@@ -15,10 +67,7 @@
 非常适合处理大形变，而其背景网格带来的自动碰撞处理，多材料耦合等。由于离散化
 出自weak form，使得MPM的physical accuracy有了保证。
 
-\subsubsection{Moving Least Squares Material Point Method}
+\subsection{Moving Least Squares Material Point Method}
 
 移动最小二乘物质点法，
-
-\subsection{硬渲染}
-
 

@@ -1,7 +1,8 @@
 % enginnering.tex
 
-\documentclass[UTF8,10pt,a4paper]{article}
+\documentclass[UTF8,10pt]{report}
 
+%% 导言区，一般用于加载宏包
 % 目录
 \usepackage[titles]{tocloft}
 % 引入中文
@@ -22,9 +23,16 @@
 \usepackage{arydshln}
 % 嵌入代码
 \usepackage{listings}
+\usepackage{listings-ext}
 
-\renewcommand\thesection{\arabic{section}}
-%\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+% 给方程，图片，表格编号，section可能换成chapter
+\renewcommand{\theequation}{\arabic{section}-\arabic{equation}}
+\renewcommand{\thefigure}{\arabic{section}-\arabic{figure}}
+\renewcommand{\thetable}{\arabic{section}-\arabic{table}}
+
+\setlength{\baselineskip}{1.5em} % 行间距
+\setlength{\parskip}{1.0ex} % 段间距
+\setlength{\parindent}{0pt} % 段落缩进
 
 % 文档开始
 \begin{document}
@@ -32,13 +40,11 @@
 %-----封面
 \begin{center}
     \quad \\
-    \vspace{3cm}
-    \hspace{1cm}\Large{Software Enginnering软件工程} \\
-    \small{整理技术累积的记录，记录相关的知识体现} \\
-    \vspace{1cm}
-    \hspace{1cm}\Large{李美杰} \\
-    \vspace{0.5cm}
-    \hspace{1cm}\Large{2019.9.23}
+    \vspace{0cm}
+    \hspace{0cm}\Large{软件工程实践手册} \\
+    \small{整理技术点，累积知识点，记录知识点} \\
+    \hspace{0cm}\Large{李美杰} \\
+    \hspace{0cm}\small{2019.9.23}
     \clearpage
 \end{center}
 %-----
@@ -74,7 +80,7 @@
 
 %-----其他
 \clearpage
-\section{附录}
+\chapter{附录}
 主要引用的文章以下：
 %-----
 

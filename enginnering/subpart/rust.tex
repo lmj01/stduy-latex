@@ -1,5 +1,4 @@
-\clearpage
-\part{Rust}
+\chapter{Rust}
 
 Rust programming language
 
@@ -87,6 +86,17 @@ Rust通过在编译时进行泛型代码的单态化monomorphization来保证效
 单态化是一个通过填充编译时使用的具体类型，将通用代码转换为特定代码的过程。
 
 
+\subsection{module system}
+rust提供了更加完善的模块化编程支持。
+\begin{itemize}
+    \item {packages包}
+    \item {Crates}
+    \item {Modules \& Use}
+    \item {Path}
+\end{itemize}
+
+
+
 \subsection{生命周期}
 很重要的概念就是生命周期，所有权和移动语义，借用概念。相比C/C++中的默认拷贝赋值，rust中不注意调用一下自己就没啦！
 默认情况下是移动语义，很多时候要强调是借用，就像C的指针，C++的引用一样，使用起来时要注意这些基础的概念，是很容易
@@ -106,9 +116,23 @@ struct中很重要的概念是生命周期，结构体中的每个字段都是�
 RefBoy的生命期一定不能比'a更长，即结构体里的引用必须要有显式生命周期，一个辈显式写出的生命周期的结构体，其自身
 的生命周期一定小于等于其显式写出的任意一个生命周期。
 
-\subsection{注解}
-作为新一代的编程语言，注解这种形式的组织代码已经是必备的功能了，不过会发现rust的
-注解上更加灵活些
+\section{Attribute}
+
+属性是作用在Rust语言元素上的元数据，有内部与外部之分
+
+\begin{description}
+    \item [Inner] \text{一个属性声明在一个元素中，可作用于整个元素内，如crate的属性使用\#![]声明}
+    \item [Outer] \text{一个属性声明在一个元素之前，作用于声明之后的元素。使用\#[]声明}
+\end{description}
+
+Rust的属性类别有
+\begin{itemize}
+    \item \text{Macro Attribute, 宏属性}
+    \item \text{Derive macro helper attributes 派生宏辅助属性}
+    \item \text{Tool attributes工具属性}
+    \item \text{Built-in attributes内置属性}
+\end{itemize}
+
 \begin{lstlisting}
     #[derive(Debug)]
     struct Rectangle {
@@ -122,4 +146,3 @@ RefBoy的生命期一定不能比'a更长，即结构体里的引用必须要有
 \end{lstlisting}
 这里增加注解来派生Debug trait，使用调试格式打印Rectangle实例。
 
-\subsection{宏}

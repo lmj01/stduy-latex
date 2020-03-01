@@ -1,6 +1,6 @@
 %%% renderer.tex
 
-\documentclass[UTF8]{article}
+\documentclass[UTF8,8pt]{report}
 % 目录
 \usepackage[titles]{tocloft}
 % 引入中文
@@ -19,11 +19,16 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{arydshln}
+% 给方程，图片，表格编号，section可能换成chapter
+\renewcommand{\theequation}{\arabic{section}-\arabic{equation}}
+\renewcommand{\thefigure}{\arabic{section}-\arabic{figure}}
+\renewcommand{\thetable}{\arabic{section}-\arabic{table}}
 % 嵌入代码
 \usepackage{listings}
 
-\renewcommand\thesection{\arabic{section}}
-%\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+\setlength{\baselineskip}{1.5em} % 行间距
+\setlength{\parskip}{1.0ex} % 段间距
+\setlength{\parindent}{0pt} % 段落缩进
 
 % 文档开始
 \begin{document}
@@ -66,6 +71,7 @@
 \input{subpart/opengl.tex}
 \input{subpart/vulkan.tex}
 \input{subpart/physically.tex}
+\input{subpart/math.tex}
 
 %-----其他
 \clearpage
@@ -73,7 +79,7 @@
 主要引用的文章以下：
 \cite{RAPI}
 \cite{Renderer}
-\cite{FoCG2Ed} 图形学基础第二版
+\cite{FCG4ed} 计算机图形学基础第四版
 %-----
 
 %-----参考文档
