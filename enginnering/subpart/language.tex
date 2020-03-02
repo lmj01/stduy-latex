@@ -68,7 +68,7 @@ setjmp和longjmp都与这个结构有关，setjmp还是一个能返回两次的�
 C++，Java等高级语言的异常处理机制，是借助全局进行处理，并没有专门提供能够有效区分正常逻辑和错误逻辑的语法，
 所有的非正常都当作异常处理，且还会带来较大的性能开销。
 
-\subsection{调用约定}
+\section{调用约定}
 函数调用约定，是对函数调用的一个约束和规范，包含
 \begin{itemize}
     \item {函数参数的压栈顺序}
@@ -77,20 +77,20 @@ C++，Java等高级语言的异常处理机制，是借助全局进行处理，�
     \item {产生函数修饰名的方法}
 \end{itemize}
 
-\subsubsection{cdecl}
+\subsection{cdecl}
 C declaration,C声明是C语言的一种调用约定，事实上的标准。参数按照从右向左的顺序
 依次压栈，调用者负责清栈。不同编译器不同平台实现的细节上是存在差异的。可编译成对应
 的汇编代码来分析。函数名加一前缀（下划线字符）。
 
-\subsubsection{pascal}
+\subsection{pascal}
 基于Pascal语言的调用约定,参数从左向右入栈.被调用者负责在返回前清栈.
 
-\subsubsection{stdcall}
+\subsection{stdcall}
 由微软创建的调用约定，是Windows API的标准调用约定。它结合了cdecl和Pascal两者优势，
 参数从右向左入栈，被调用者负责清栈。编译后函数名添加后缀@length,length是传递函数参数
 所占的栈空间的字节长度.
 
-\subsection{语言特性}
+\section{语言特性}
 特性，即概念的描述方式，王银在他的文章《如何掌握所有的程序语言》中描述的那样：
 \textbf{如果你不能用一种语言里面的基本特性写出好的代码，那你换成另外的一种语言也
 无济于事。是否能写出好的代码在于人，而不在语言。如果你心中没有清晰简单的思维模型，
@@ -100,13 +100,13 @@ C declaration,C声明是C语言的一种调用约定，事实上的标准。参�
 语言比自然语言简单清晰，也更加严谨和形式化。所以不要想着用尽语言提供的特性，而是使用
 经过千锤百炼的特性才能保证稳定性。
 
-\subsubsection{指针}
+\subsection{指针}
 在C，C++语言中，指针是一个很灵活的方法，但不是所有语言都有这种特性，也不适合一些语言。
 它们使用指针是因为它们可以直接与硬件进行沟通，而在现代化的快速应用中，很多软件都是建立在
 一个抽象层上面进行开发的，就是为了确保与硬件无关，所以这些语言根本不需要指针这种概念，如
 Java就没有指针概念！因为它是建立在C，C++编写的应用上面的一种抽象语言。
 
-\subsubsection{mutable与immutable}
+\subsection{mutable与immutable}
 \textbf{mutable}与\textbf{immutable}这两个概念是函数式编程语言中是很基础的概念，它们对变量加强了说明，
 是在语义上进行改进的语言。也是区分静态类型与动态类型语言的一个指标，静态类型语言是要严格区分的！
 
@@ -116,11 +116,11 @@ C++中默认是可变的，不可变的需要加上const，这是比较反常的
 在Rust这样的语言中，为确保类型安全，明确了语言的语义，在语义上通过编译器来保证逻辑上的清晰，既有函数式风格，
 也有系统编程语言的能力，避免存在歧义的语句存在，每一条语句都需要明确到位。
 
-\subsubsection{constant}
+\subsection{constant}
 常量，在它的范围内scope只声明一次，不可更改的变量。
 常量表达式，就是在编译期可计算的值，而不是运行期中计算得到的值。
 
-\subsubsection{函数}
+\subsection{函数}
 特性有如下特性：
 \begin{itemize}
     \item {函数是一阶值，First-class valuue, 即函数可以作为另一个函数的返回值或参数，也可作为变量值}
@@ -137,11 +137,11 @@ C++中默认是可变的，不可变的需要加上const，这是比较反常的
     下来，在被调用时的有效作用域是在声明时的，而不是调用执行时的}
 \end{itemize}
 
-\subsubsection{inline}
+\subsection{inline}
 内联，短小的函数不存在函数调用的开销，是因为现代编译器都能自动把小函数inline到被调用的地方。
 早期的C语言编译器里，宏就是有这么一个功能，替换小函数，这也是大量使用宏的原因。
 
-\subsubsection{FFI}
+\subsection{FFI}
 Foreign Function Interface, 是指与其他语言交互的接口，现实中的程序基本没有单语言的软件啦！
 跨语言调用就成了一门语言的必然趋势，常用方法有两种
 \begin{itemize}
@@ -265,76 +265,6 @@ glue code language，胶水语言，
     \item {职责链式函数调用}
     \item {组合代替继承}
 \end{itemize}
-
-
-\chapter{计算机组织结构}
-目前接触到的都是冯诺依曼体系结构的计算机，它也是现代计算机的产生的基础。
-\subsection{CPU}
-LSB-least significant bit最低位放在第0位，MSB-most significant bit，最高位放在第0位。
-\newline
-big-endian, first byte(MSB),...,last byte(LSB)
-\newline
-little-endian, first byte(LSB),...,last byte(MSB)。
-\newline
-CPU有两个特色的\textbf{位处理指令}，是硬件层内置，效率很高的。
-\begin{itemize}
-    \item {BSF, 前向位扫描}
-    \item {BSR, 反向位扫描}
-\end{itemize}
-
-\subsubsection{寄存器}
-CPU 只负责运算，不负责存储数据，是LOAD-COMPUTE-SAVE原语模型。从内存中LOAD数据到CPU，执行计算，
-完成后再SAVE回内存，而CPU的效率远高于内存，为解决LOAD和SAVE耗时，CPU自带了寄存器register来缓存，这样CPU优先
-从register中获取数据，再由register与内存交换数据。
-\newline
-\textbf{register相比内存，是没有地址概念的，它们是通过自己的名称，CPU直接对名称进行操作的}
-\newline
-在Intel X86早期时，只要8个寄存器,\textbf{EAX,EBX,ECX,EDX,EDI,ESI,EBP,ESP},除ESP有特定用途（保存当前的stack栈的地址）
-，其他7个是通用性寄存器。现在已经扩展到64位，特定领域的有更高的。 
-
-\subsection{内存模型}
-寄存器个数有限，更多的数据还是存在内存中。程序运行时，操作系统给程序分配一段内存（计算机物理内存可能很大，对不同
-程序都要分配一段逻辑内存，保证每个程序都得到同样的对待）来存储程序和数据。
-\newline
-这段内存有起始地址和结束地址，如0x1000到0x8000.从低地址往高地址，有几个区域，分别为
-\subsubsection{code area}
-代码区，一般是只读区域，存储程序的源代码的二进制形式(即汇编的代码，CPU指令的二进制值指令，每条指令包含操作码，
-操作对象或对象地址的引用)。
-\newline
-\textbf{曾经在我心中的，关于条件分支代码的执行，一直没有明白，总觉得要是这次执行true，下次执行false，那怎么来
-保存这种组合的呢？让我困惑多年的不解之谜，原来就是在这里，所有代码都对应着CPU的执行，总是一遍又一遍的执行相同的
-代码，从这个位置跳转到那个位置进行执行，循环递归下去至永远}
-\newline
-这些操作对象可能是
-\begin{itemize}
-    \item {立即数，直接存在代码区，如具体的数字5}
-    \item {全局数据，在stack中分配空间存储，然后引用该数据的地址}
-    \item {数据区，代码中引用的是它们的地址}
-\end{itemize}
-
-\subsubsection{data area}
-由操作系统根据代码区创建的区域，与内存相关的操作由操作系统申请与释放。
-\begin{itemize}
-    \item {BSS-Block Started by Symbol, 静态内存分配，程序一开始清零的区域，运行期可动态改变；是全局变量未初始化
-    ，以占位符的形式存在，未分配空间，仅记录数据的大小空间
-    }
-    \item {initial global data, 初始化全局变量，只执行一次}
-    \item {static data, 全局，局部的静态变量，字符串，其中关于字符串常量是存在常量区还是stack区域，不同的编译器实现是有差异的}
-\end{itemize}
-
-\subsubsection{heap area}
-向上增长，分配地址越来越大，由程序员分配和释放。
-
-\subsubsection{stack area}
-向下增长，分配地址越来越小。由系统自动分配，包括函数的参数值，局部变量等，执行完成后自动释放。
-
-\subsubsection{argument area}
-命令行参数区域，存放命令行参数和环境变量的值。
-
-\subsubsection{编程语言模型的内存布局}
-很多编程语言模型的内存布局是其性能高低的一个重要参数，C是堆栈结合，C++为了抽象，把对象的内存布局弄得较复杂，特别是多态的引入。
-而想Java或其他语言，有GC的，基本都是在堆上的内存申请。
-rust能到达C的性能，是满足了零抽象，不像C++那样有虚函数的开销，实用性得到满足了。
 
 \chapter{编译器}
 编译器的技术就是翻译人与机器的沟通，体现在两方面，一是工程化需要，需要大量的交流，不能简简单单的操作硬件来完成；
