@@ -1,10 +1,6 @@
-\clearpage
-
-\part{programming language}
+\chapter{programming language}
 编程语言是工具，是服务于软件工程的最基本的工具。针对不同的需要才会产生对应的语言工具，
 没有一种语言是万能的，是通用的，每一门编程语言都是特定领域的特定产物。
-
-\chapter{通用概念}
 
 \section{异常}
 异常，一般指程序运行期发生的非正常情况，一般是不可预测的，如内存不足，除零等。
@@ -266,81 +262,3 @@ glue code language，胶水语言，
     \item {组合代替继承}
 \end{itemize}
 
-\chapter{编译器}
-编译器的技术就是翻译人与机器的沟通，体现在两方面，一是工程化需要，需要大量的交流，不能简简单单的操作硬件来完成；
-一是简化人的交流成本，特别在指定领域，快速的结果是推导前进的基础。
-
-\section{概念}
-
-\subsection{自举}
-用低级语言先实现一个简单的编译器,然后用这个编译器的语言再去编写一个更高级的编译器.
-新编译器就是旧编译器的扩展,这个过程称为自举.
-
-\subsection{交叉编译}
-不是每个设备都像PC这样便利，为其他设备进行软件开发的过程需要的技术。分两类
-\begin{itemize}
-    \item {\textbf{小设备},如嵌入式或手机,在PC上完成编译过程,把打包的二进制放入小设备内存中运行.
-    本质就是 PC 运行小设备的编译器进行开发,这样避免掉小设备的内存、开发环境、效率等限制}
-    \item {\textbf{跨平台},使用Linux编译一个程序,移植portable到window上.本质就是源设备上的编译器,
-    具有生成目标设备上的机器代码的功能}
-\end{itemize}
-
-\section{JIT}
-Just In Time,即时编译，混合了静态编译与动态解释，将频繁执行的代码编译成机器码缓存起来，对于执行一次的代码任然是
-逐行逐条解释执行的技术。
-\newline
-\textbf{Method JIT}，方法即时编译，如Java。主要的步骤如下
-\begin{itemize}
-    \item {跟踪热点函数，编译成机器码执行，并缓存}
-    \item {非热点函数解释执行}
-\end{itemize}
-\textbf{Trace JIT}, 跟踪即时编译，如Lua，相比Method JIT，它不检测和优化热点函数，而是检测并优化热点跟踪或执行路径。
-
-\section{GC}
-
-Garbage Collection
-
-\subsection{mark-and-sweep}
-系统管理所有创建的对象，每个对象都有对其他对象的引用，root集合代表着已知的系统级别的对象引用。从root集合出发，就可以访问
-到系统引用的所有对象，而没有被访问的对象就是垃圾对象，需要被销毁的，状态分为
-\begin{itemize}
-    \item {white，待访问状态，还未被gc访问到}
-    \item {gray，待扫描状态，已被访问到，但它对其他对象的引用还未访问到}
-    \item {black，已扫描状态，对象关联的都已访问到}
-\end{itemize}
-\begin{lstlisting}
-    all object set white
-    visit root set to  put gray set,
-    make white to gray state 
-    while gray set no empty {
-        fetch object from gray set, object set black 
-        for (obj in all object referenced by object) {
-            if obj is white 
-                obj from white to gray, 
-                and add to gray set 
-        }
-    }
-    for any object {
-        if object is white {
-            destory object 
-        } else {
-            set object white state
-        }
-    }
-\end{lstlisting}
-
-\section{BNF}
-Backus-Naur Form巴科斯范式，用来描述计算机语言语法的符号集，是一种典型的元语言，它严格地表示语法规则，
-且描述的语法与上下文无关的,它的扩展是ABNF 
-\cite{ABNF}
-
-\subsection{expression}
-表达式在编程语言中代表一个可以返回值的语法单位，在不同语言中有不同的形式：
-\begin{itemize}
-    \item {函数式编程语言，大多数语句都是表达式}
-    \item {命令式编程语言，一般将语句分成表达式和陈述句statement}
-    \item {常量表达式，在BNF中属于终结符}
-\end{itemize}
-
-\section{工具}
-Lex \& Yacc是一套生成语法的工具，可以快速方便成型。相对于手写的词法器，具有一定的优势。

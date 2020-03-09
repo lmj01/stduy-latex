@@ -1,5 +1,5 @@
 \clearpage
-\part{Reverse Enginner}
+\chapter{Reverse Enginner}
 逆向工程，是软件中的一个核心技能，是一个双刃，既能防御，又能破解别人的技术。
 
 软件逆向工程，是指从可运行的程序系统出发，运用解密，反汇编，系统分析，程序理解等计算机技术，对软件的结构，流程
@@ -11,27 +11,27 @@
     \item {领域，加密解密，网络原理，内核编程，反调试和代码混淆}
 \end{itemize}
 
-\chapter{Tool}
+\section{Tool}
 
 逆向最主要的方法就是通过调试分析，反调试，而且在熟练使用工具之于还必须做到快速识别能力，
 即调试到关键阶段，却不能猜测出模式与原理，基本无望于结果！
 
-\section{windbg}
+\subsection{windbg}
 内核调试器
 
-\section{ollydbg}
+\subsection{ollydbg}
 动态调试器
 
-\section{IDA pro}
+\subsection{IDA pro}
 静态反汇编
 
-\section{RenderDoc}
+\subsection{RenderDoc}
 GPU图形shader的调试工具
 
 
-\section{步骤}
+\subsection{步骤}
 
-\subsection{研究保护方法}
+\subsubsection{研究保护方法}
 开发者为了维护关键技术不被侵犯，采用了各种软件保护技术。
 \begin{itemize}
     \item {序列号}
@@ -40,18 +40,18 @@ GPU图形shader的调试工具
     \item {加壳}
 \end{itemize}
 
-\subsection{反汇编目标软件}
+\subsubsection{反汇编目标软件}
 通过动态与静态调试分析相结合，跟踪，分析软件的核心代码，理解软件的设计思路，
 获取关键信息。
 
-\subsection{生成目标软件的相关文档}
+\subsubsection{生成目标软件的相关文档}
 获取的关键信息反推，设计思想，架构，算法等文档
 或如何扩展目标软件的功能
 
-\subsection{向目标软件注入代码}
+\subsubsection{向目标软件注入代码}
 打补丁破解，或增强功能
 
 
-\section{源码分析}
+\subsection{源码分析}
 开源项目越来越多，如何去理解以及破解核心开源的软件组件，也需要大量知识体系。
 从宏观到微观，注重大体框架，一步步去理解
