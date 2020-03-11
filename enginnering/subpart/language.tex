@@ -146,7 +146,7 @@ Foreign Function Interface, 是指与其他语言交互的接口，现实中的�
 \end{itemize}
 大多数属于兼容C ABI的实现。
 
-\subsubsection{生成器}
+\paragraph{生成器}
 生成器generator是一种特殊的迭代器，是一个函数，能多次返回的函数，即遇到yield就是返回，下次执行函数时从上一次yield的地方继续执行，这种机制就称为生成器。
 
 yield关键字有两点作用
@@ -155,7 +155,7 @@ yield关键字有两点作用
     \item {将yield关键字后面表达式的值作为返回}
 \end{itemize}
 
-\subsubsection{协程}
+\paragraph{协程}
 协程是指具有这些函数
 \begin{itemize}
     \item {彼此间有不同的局部变量，指令指针，但任共享全局变量}
@@ -163,7 +163,7 @@ yield关键字有两点作用
     \item {多个协程间表现为协作运行，同一时刻只能有一个协程运行，即无法并发，不含多线程情况}
 \end{itemize}
 
-\subsubsection{多态}
+\paragraph{多态}
 在编程语言和类型论中，多态polymorphism指为不同数据类型的实体提供统一的接口。
 多态类型polymorphic type可以将自身所支持的操作套用到其他类型的值上。
 
@@ -195,7 +195,7 @@ Rust中引入的trait系统解决了C++中的缺点。
     \item [insert] \text{在处理属性的过程中，保留它们自己}
 \end{description}
 
-\subsubsection{修饰器Decorator}
+\paragraph{修饰器Decorator}
 用来修饰类，改变类的行为的。是代码编译时发生的，而不是在运行时，即在编译期阶段
 就执行修饰器的作用。动态语言有这个特性，是让编译期来自动处理一些操作，比起静态
 语言C来说，相当于宏的作用。
@@ -214,15 +214,15 @@ Rust中引入的trait系统解决了C++中的缺点。
 \subsection{编程范型}
 The principal programming paradigms.\cite{TPPP}列出了编程范型。
 
-\subsubsection{过程}
+\paragraph{过程}
 
-\subsubsection{结构化}
+\paragraph{结构化}
 
-\subsubsection{面向对象}
+\paragraph{面向对象}
 
-\subsubsection{泛型}
+\paragraph{泛型}
 
-\subsubsection{函数式}
+\paragraph{函数式}
 
 函数式思想是很重要的，对于第一门语言是C的我来说，有一个很大的障碍来自，学习C语言时，把重要性过渡于强调它的普遍性与通用性。
 而当时被灌输时，并没有非常系统化介绍，基本是国外教科书的照搬，很多概念都在纠结，这些概念其实在工作中并没有多大的作用，毕竟
@@ -230,24 +230,24 @@ The principal programming paradigms.\cite{TPPP}列出了编程范型。
 
 C语言的函数指针呀，后来的Javascript，Lua，Python等都是非常强调这些功能的，对我而言还是非常简陋的被介绍而已！
 
-\subsubsection{并发}
+\paragraph{并发}
 
-\subsubsection{分布式}
+\paragraph{分布式}
 
-\subsubsection{DSL}
+\paragraph{DSL}
 Domain Specific Language,领域编程语言，基于特定领域开发相关的编程语言。
 
-\subsubsection{IDL}
+\paragraph{IDL}
 interface description language, or interface definition language,
 接口描述(定义)语言，是一种语言规范，用来描述组件的API。在跨语言，RPC方面上
 大量应用。
 
-\subsubsection{Glue code}
+\paragraph{Glue code}
 glue code language，胶水语言，
 
 \subsection{多线程}
 
-\subsubsection{atomic operation}
+\paragraph{atomic operation}
 原子操作是不需要synchronized，是指不会被线程调度机制打断的操作，即这种操作一旦执行，就会
 一直运行到结束，中间不会有任何context switch。
 
