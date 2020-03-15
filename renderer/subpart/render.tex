@@ -139,14 +139,30 @@ Phong模型引入镜面光，即ADS(ambient,diffuse,specular)，认为镜面与�
 \end{align*}
 
 Ks为镜面反射系数，Ns为高光指数。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/classical-phong.png}
+    \caption{Phong-Problem}\label{Phong-Problem}
+\end{figure}
+图\ref{Phong-Problem}模型中存在一个问题就是$\alpha$的角度大于90度时，会导致结果为负，产生假象。
+
 Blinn-Phong是基于Phong的修正模型，
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/blinn-phong.png}
+    \caption{Blinn-Phong}\label{Blinn-Phong}
+\end{figure}
+
+图\ref{Blinn-Phong}通过半角来方法来解决可能出现角度大于90度的问题。
 
 \begin{align*}
     H = \frac{L + V}{|L + V|}, \\
     I_{spec} = Ks * Il * (dot(N, H))^N_{s}
 \end{align*}
 
-H是入射光线方向L与视线方向V的中间向量，称之为半角向量。相比两者，前者更真实，后者高光更柔和，且计算速度较快，
+H是入射光线方向L与视线方向V的中间向量，称之为半角向量。Classical-Phong更真实，Blinn-Phong高光更柔和，且计算速度较快，
 实际中应用更广，OpenGL和DirectX渲染管线中是默认渲染模型。
 
 \section{Global Illumination}
@@ -324,10 +340,10 @@ UV展开就是把物体的表面映射到平面图像上的过程。为了让弯
 Bump Map是Phong Shading的一项扩展，因为表面法线用来计算顶点的光亮，而Bump Map就是为了影响法线的改变，最终影响颜色值。
 所以算是一种负责光方向的纹理映射，不同的凹凸数据，使用不同的方法来影响法线。
 
-\begin{itemsize}
+\begin{itemize}
     \item \text{Emboss Bump Map}
     \item \text{DOT3 Bumap Map}
-\end{itemsize}
+\end{itemize}
 
 \subsection{Normal Map}
 
@@ -515,13 +531,19 @@ linearDepth是规格化的Z值，它满足线性分布。现在的问题就如�
     posView = viewRayDir * linearDepth;
 \end{lstlisting}
 
-\section{Trackball}
+\section{Control}
+
+场景中使用控件来改变形态，存在两种方法，一是改变object的旋转，非常适合单一场景中的物体；一是漫游之类的控件，改变camera的
+形态来对静态的模型进行观察，多用于大场景中，如游戏中，有其他参考物的可以使用这种方式。
+
+\subsection{Trackball}
 轨迹球\cite{Trackball}
 轨迹球就是在屏幕之外虚构一个球形曲面，使鼠标在二维屏幕上的移动投影到球形曲面上。
 即一个半球覆盖在屏幕上面。以屏幕中心为球心O，X轴向右，Y轴向上，Z轴向外。当鼠标在球面的范围内移动时，可以由二维屏幕上的二维左边点P(x,y)，通过数学关系求得其在球面上的投影点P'。
 鼠标从P1移动到P2，对应的球面就是从P1'到P2'。产生两个向量V1=OP1',V2=OP2',  
 V1与V2的叉乘得到向量N，即三维物体的旋转轴，V1到V2的转角量就是三维物体的旋转角度。
 屏幕时矩形，球形的投影在屏幕的平面上只会是一个圆，总会有些区域的点投影后会落在球面之外。
+
 
 \section{Grid}
 绘制网格，是很多场景都需要的，有两种思路， 基于直线，基于Pattern网格思路。

@@ -118,3 +118,62 @@ Curiously Recurring Template Pattern,奇异递归模板模式。1980年作为F-b
     \item {std::enable\_shared\_from\_this针对std::shared\_ptr就是实例，WTL微软的轻量级窗体库}
 \end{itemize}
 
+\section{Template Metaprogramming}
+
+模板应用在两个类型，\textbf{Function Templates}和\textbf{Class Templates}。模板编程是一种plugin-in的运作方式，要分清运行期与编译期的
+结果，如果对代码在这两个区间分不清就不能完全控制代码的能力。
+
+\subsection{Type Traits}
+It can apply transformation to a type, for example, given \textbf{T}, you can add/remove the \textbf{const} specifier.
+A type trait is a simple template struct that contains a member constant, which in turn holds the answer to the question
+the type traits asks or the transofrmation it performs.
+\begin{lstlisting}[language=c++]
+    #include<iostream>
+    #include<type_traits>
+    class Class{};
+    int main() {
+        std::cout << std::is_floating_point<Class>::value << std::endl; // 0
+        std::cout << std::is_floating_point<float>::value << std::endl; // 1
+        std::cout << std::is_floating_point<int>::value << std::endl; // 0
+        return 0;
+    }
+\end{lstlisting} 
+编译期做的工作就是为每个type生成对应的traits,这些都是在编译期完成的，这种泛型抽象能力与zero overhead是模板编程的最大优势
+\begin{lstlisting}[language=c++]
+    struct is_floating_point_Class {
+        static const bool value = false;
+    }
+    struct is_floating_point_float {
+        static const bool value = true;
+    }
+    struct is_floating_point_int {
+        static const bool value = false;
+    }
+\end{lstlisting} 
+理解type traits最大的问题就是在于编译期帮忙做了很多事情，而对抽象的原理不理解就更会感觉到恐惧，对未知的恐惧。
+
+\subsubsection{Concepts}
+类似于OO中的interface，如果一个class实现了interface，就可以当作interface来使用。concept是一组操作，如果
+一个type具有这些操作，就说type是这个concept的一个model。
+
+主要是为了简化泛型编程，一个concept就是一个编译期判断，用于约束模板参数，concepts就是编译期条件的合集。
+
+\subsubsection{Introspection}
+内省It is the ability of a program to examine the type or properties of an object.
+如很多语言带有的getter与setter调用。
+
+\subsubsection{Reflection}
+反射It is the ability of a program to observe and alter its own structure or its behavior.
+
+\subsubsection{Tag Dispatch}
+Empty classes can be useful in c++ because it is strongly typed language. If there are two 
+empty classes, they are different types.
+\begin{lstlisting}[language=c++]
+    class Empty{}; // a unique type
+
+    template<bool>
+    struct UseSemantics{};
+
+    void function1(int a, UseSemantics<true>{});
+    void function2(int b, UseSemantics<false>{});    
+\end{lstlisting} 
