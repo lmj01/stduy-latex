@@ -105,3 +105,23 @@ BSA，黑空反照率。指忽略大气散射，只考虑地物对太阳直射�
 
 移动最小二乘物质点法，
 
+\chapter{Physically Based Rendering}
+
+Physically Based Rendering Toolkit是一个基于物理渲染的开源离线渲染器， 可参考配套的书\cite{PBR3ed}。
+
+
+
+\paragraph{Markov Process}
+
+Markov Chain可应用到渲染上是基于Detailed Balance的方法。
+
+光线传递的随机性(光子抵达物体表面材质后被吸收或随机反射)仅由当前状态决定，和历史无关，满足马可夫过程定义。
+
+在渲染中使用Markov Chain Monte Carlo没有复杂的物理，现代所有光线传播的模拟都是基于对渲染方程rendering equation
+的求解，而渲染方程已经将原本的物理系统大大的简化了，所以光线传递的物理到底是不是平稳马尔可夫过程和渲染没有任何关系，
+渲染只是要计算一个定义域纬度很高的函数而已，对于一个场景，固定的一组输入是会返回一个固定的值，没有什么随机和模糊的东西，
+最极端简化就是一个一维函数，Metropolis Sampling的牛逼之处在于它不需要求解函数的积分或者算它的概率分布就能给你提供一系列
+和目标高数概率分布一致的样本，这一点对基于Monte Carlo的渲染来说十分重要，叫做重要性采样Importance Sampling。
+
+所以Metropolis Sampling主要用来渲染一些采样路径特别复杂的场景，一般室外大太阳的场景用不着付出额外的计算。Metropolis Light Transport
+的论文就是用了一个光源在一个微微打开的门缝后面的场景当例子。

@@ -254,3 +254,20 @@ $P_{S \leftarrow T}=\begin{bmatrix} 1&0&1\\1&1&1\\0&2&1\end{bmatrix}$。
 高维叫做观察维数，也叫自然坐标。
 
 
+\section{Mesh}
+Mesh Parameterization参数化或Flattening展平，基本概念就是一个三维的离散网格映射到
+二维平面网格的过程。变换的过程中存在一些约束，如保存特定的性质，如三角形面积，角度，边长变化较小，无影响视觉上的识别。
+最根本是要一一对应即双射bijective，无重叠overlap，无反转folding。它的应用广泛于图形学中。
+
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{images/mesh_parameterization_applications.png}
+\end{center}
+
+其中存在一些非常重要的概念：
+\paragraph{边界}
+保持面积或角度的不变，是因为实际需要，如GPU和effect效果的原因，但要完全三角形的映射是完全的，除了类似于折纸(一个平面任意扭曲形成的空间曲面)的网格，
+其他网格基本不可能获得完美的保持角度或长度的展开undevelopeable。 
+
+MIPS(Most Isometric Parameterization), 基于扭曲受限的参数化，基于圆模式Circle-Pattern，最小化角度扭曲的参数化
+
+以及最新的LSCM，BFF(Boundary-first-flattening)
