@@ -28,3 +28,9 @@ zhangyu1000/*
 
 noteTemplate2/note.nav
 noteTemplate2/note.snm
+renderer/subpart/tmp.tex
+resume/scripts/fs_sty.sh
+resume/scripts/fs_sty.py
+resume/scripts/fontawesome_tail.sty
+resume/scripts/fontawesome_preamble.sty
+resume/latexmkrc
