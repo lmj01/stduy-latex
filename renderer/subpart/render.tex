@@ -90,6 +90,86 @@ IBR,基于图像的渲染，完全摒弃传统的先建模，然后确定光源�
     \caption{Phong Shading Model}
 \end{figure}
 
+
+\section{Deferred Shading}
+
+\begin{itemize}    
+    \item {不能使用混合技术}
+    \item {占用较高的显存}
+    \item {光照的开销与场景复杂度无关}
+    \item {Shader可以访问深度和其他像素信息}
+    \item {每个像素对每个光源仅运行一次，被遮挡的像素是不会参与计算}
+    \item {材质与光照的Shader是分开的}
+\end{itemize}
+
+\section{Anti-Aliasing}
+
+渲染中，最终结果是一张图像，其最小单位就是像素。像素是很小的一个色块，当图像分辨率足够高时，色块足够小，
+相邻色块之间的颜色差异人眼是很难辨别的，看到的就是一副细腻顺滑的图像，当分辨率较低时，为了填充同样大小的
+屏幕，色块的尺寸就相应变大了，色块之间的差异就很难被忽视了。因为屏幕是点阵显示，就造成物理上无法避免的问题。
+
+\subsection{Samping}
+
+锯齿产生的主要情况有：
+\begin{itemize}
+    \item {几何走样，几何物体的边缘有锯齿，对几何边缘采样不足导致的}
+    \item {着色走样，渲染方程中的着色公式采样不足导致的，就是高光闪烁就是一种情况}
+    \item {时间走样，对高速物体的采样不足，比如播放的动画发生跳变}
+\end{itemize}
+
+按照香农采样定律的理论，要想通过对采样后的信号进行重建Reconstruct来获得原始信号，就必须保证采样频率不低于
+原始信号最高频率的两倍。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/ssaa.png}
+    \caption{SuperSampling AA}
+\end{figure}
+
+图元覆盖在色块上，简单的判断就是是否中心点被覆盖否，但是这样判断会引入图元的位置差异结果，将色块进一步细分成不同的
+小块，对每个小块进行判断，再由这些小块的颜色加权计算出来，这就是通过采样来得到更好的颜色值。
+
+带来的问题就是一次pass对Pixel/Fragment shader需要4倍的像素处理，另一种思路就是多次pass的Accumulation Buffer方法，
+每次pass时都进行一定程度的偏移(通常0.5个像素)，最后进行累积后再平均，但是多次绘制需要进行Buffer之间的
+数据拷贝，消耗也是非常大的。
+
+
+\subsection{Sampling Pattern}
+
+先说说采样点纹，即才采样点在像素色块中的分布方式。研究表明人眼感官影响最严重的锯齿现象是由水平或垂直边缘导致的，其次是45度夹角的边缘。
+Rotated Grid SuperSampling就是把采样点旋转45度的来提升AA的质量。
+
+\subsection{MSAA}
+
+Multisampling Antialiasing是改进版，SSAA对每次FS需要四次sample计算，假设色块任意点颜色值近似相同，把sample后的值存入
+对应的buffer中，利用这些覆盖点的sample点进行插值，就是Centroid Sampling(Interplotation),这个动作通常由硬件自动完成。
+
+MSAA渲染完成后，需要将subsample的数据转换为pixel color，这个过程称为MSAA 解析Resolve。现代GPU的FS或Compute Shader都可以直接
+操作MSAA的处理过程，可以使用不同的filter来实现图像的AA重建，可以参考\cite{OpenGLMultiSampling}
+
+下图来自Direct3D11的Graphics Pipeline\cite{RasterizationRules} 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/d3d10-rasterrulesmsaa.png}
+    \caption{MSAA sample 4 for d3d10}
+\end{figure}
+
+\subsection{TAA}
+
+上面讨论的都是在同一帧中，像素在不同位置上的采样处理，可认为是空间上的方法。现在从时间角度上来分析，实时渲染在一秒内会进行
+多帧的连续渲染，前后两帧的重复度极高，利用之前多帧的渲染结果提取信息来优化渲染结果是否可行呢？这就是Temporal AA。 
+
+使用TAA好处是同一帧没有额外的采样消耗，只需要对多帧结果进行一个融合即可，但多帧的重叠度与加权值的处理不够好时，会出现抖动闪烁
+的瑕疵。解决方法有两种，一是只对低速物体使用TAA，一是对当前帧与之前帧的画面进行映射与投影校正reprojection，常见的使用速度
+贴图velocity buffer。TAA+Velocity Buffer与Deferred Rendering是不兼容的。
+
+\subsection{MLAA}
+
+锯齿产生在于几何形状与颜色交界处，如果能事先得到这些信息，就可以针对性的进行抗锯齿处理，2019年Reshetov提出一种沿着边界线
+edge进行的AA方法，称为Morphological Antialiasing, 此方法侧重于边界线的定位与重构。
+
+
 \chapter{Illumination Model}
 
 当光照射到物体表面时，物体会对光发生反射、透射、吸收、衍射、折射、干涉等。其中被物体吸收的部分转化为热。
