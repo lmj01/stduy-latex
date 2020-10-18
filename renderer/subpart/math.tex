@@ -11,8 +11,49 @@
     \includegraphics[width=0.4\textwidth]{images/crossProduct.png}
 \end{center}
 
+\section{Degree of Freedom}
 
-\section{Solid Rotations}
+自由度, 这里特指六自由度，是指任何一个没有受约束的物体，在空间具有六个自由度，沿x、y、z三个直角坐标轴方向的移动自由度，
+和绕三个坐标轴的旋转自由度。用数学语言描述就是：在三维空间中，描述一个刚体(坐标系)需要6个参数，即位置参数x、y、z；姿态参数(坐标轴方向)
+$\alpha$, $\beta$, $\phi$ 。 如果把6个参数视为刚体(坐标系)的一个状态，那每一个状态$\Phi$就可以视为一个六维矢量(矢量中每个参数都是独立的)。
+
+自由度是对geometry进行注解的，目前了解的有小类是：
+
+\paragraph{rigid}
+
+刚体，这是比较理想情况几何体，
+
+\paragraph{Deformable} 
+
+几何体可自由变形，当被施加力，几何体发生形变
+
+\paragraph{Coupled}
+
+将一个面上的所有点绕参考点旋转，如刚性面，但可以选择约束自由度。分运动耦合和分布耦合
+
+\paragraph{Tie}
+
+将两个面捆绑起来，从面是根据主面而动的，绑定区域不发生相对运动和变形，刚度较大
+
+
+ 
+\section{Linear-Transform}
+
+线性变换主要包括缩放、旋转、反射等，不包含平移。线性变换的数学描述为：
+
+\begin{math}
+\begin{aligned}
+f(\alpha v)=\alpha v, \\
+f(u+v)=f(u)+f(v)
+\end{aligned}
+\end{math}
+
+
+反射，就是把一个物体变换成它的镜像的映射，在二维空间中，用一条直线作为“镜子”；在三维空间中，使用平面作为“镜子”。
+
+
+
+\subsection{Solid Rotations}
 
 部分内容参考Euclidenan Space网站\cite{Euclideanspace}。
 
@@ -55,21 +96,8 @@
  \hbox{applied last} & bank & tilt & \hbox{$\psi$(psi)} & \hbox{roll横滚} \\ \hline
 \end{tabular}
  
- 欧拉角的是为了方便主观去理解，与Axis Angle类型，以理解为主要入手处。
+欧拉角的是为了方便主观去理解，与Axis Angle类型，以理解为主要入手处。
 
- 
- \section{Linear-Transform}
-
-线性变换主要包括缩放、旋转、反射等，不包含平移。线性变换的数学描述为：
-
-\begin{math}
-\begin{aligned}
-f(\alpha v)=\alpha v, \\
-f(u+v)=f(u)+f(v)
-\end{aligned}
-\end{math}
-
-反射，就是把一个物体变换成它的镜像的映射，在二维空间中，用一条直线作为“镜子”；在三维空间中，使用平面作为“镜子”。
 
 
 \section{ Matrix }
@@ -222,9 +250,7 @@ $P_{S \leftarrow T}=\begin{bmatrix} 1&0&1\\1&1&1\\0&2&1\end{bmatrix}$。
 
 过渡矩阵应用在：骨骼算法中，
 
-\chapter{Geometry}
-
-\section{Conception}
+\section{Geometry}
 
 \subsection{Euclidean Geometry}
 欧几里得几何学，是对空间物体的刻画，是基于某个维度上的内积inner product。对于空间中的点和线，感兴趣的是它们的距离、角度
