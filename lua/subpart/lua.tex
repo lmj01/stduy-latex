@@ -1,0 +1,39 @@
+\chapter{Lua}
+
+lua\cite{luaorg} 目前是没有标准的，是一门小众化语言，但它优势在于小巧，代码量少。
+多用于游戏与数据处理软件中
+
+它的源代码量小到足够到去全部理解，用来学习是非常适合的，学习编译原理相关的知识，
+都可以通过它来一窥乾坤！
+
+\section{conception}
+
+\paragraph{module \& package}
+lua的模块是由变量、函数等组成的table对象，其加载机制通过require来导入，require的路径是全局变量package.path中的值，
+lua启动后会取查找，执行print(package.path)可以看到输出的结果
+
+\paragraph{C package}
+使用C为lua写包，是动态库的调用方法
+
+\paragraph{closure}
+closure对象是lua运行期一个函数的实例对象
+
+\paragraph{proto}
+proto对象是lua内部代表一个closure原型的对象，有关函数的大部分信息都保存在这里，
+
+\begin{itemize}
+    \item {instructions指令列表，函数编译后生成的虚拟机指令}
+    \item {constant table常量表，运行期的所有常量，在指令中，常量通过id在常量表中索引}
+    \item {child proto table子proto表，所有内嵌于函数的protoa，指令$OP_CLOSURE$的proto就是在这个表中通过id索引}
+    \item {\text{local var desc}局部变量描述，函数使用的所有局部变量名称，以及生命周期}
+    \item {\text{upvalue desc函数使用到的upvalue描述}}
+\end{itemize}
+
+\paragraph{chunk}
+代表一段符合lua的语法的代码，$lua_load$会对chunk编译生成一个$mainfunc proto$，内部所有函数都对应一个proto。整个过程就是以
+$mainfunc$为根节点的$proto$树结构。
+
+\textbf{注意，lua编译过程中是一次遍历就生成指令的，并没有对源码和语法结构多次遍历，是通过指令回填技术来实现支持顺序的。}
+
+
+

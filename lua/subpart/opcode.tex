@@ -1,0 +1,47 @@
+\chapter{Opcode}
+
+与WebAssemlby等虚拟机一样，Lua的vm指令也分为两个部分，操作码opcode和静态参数static arguments。
+指令在执行时，通常还需要动态参数，一般称作操作数operands。
+
+WebAssemlby采用了栈式Stack-based虚拟机模型，指令在执行时可以从操作数栈上压入、弹出操作数。而Lua
+采用了寄存器式Register-based虚拟机模型，指令在执行时可以操作一个虚拟寄存器，用于读写操作数。指令参数
+最主要的作用就是表示寄存器索引，这也是lua虚拟机采用定长指令的原因之一(WebAssemlby采用变长指令)。
+
+理解lua，先要理解它编译后的形态，是指令，就至少要到汇编级别来理解了，毕竟汇编的本质是CPU二进制指令的文本形式。
+
+lua5.3的指令编码如下表所示
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|} \hline
+       \hbox{} & \hbox{31-24} & \hbox{23-16} & \hbox{15-8} & \hbox{0-7} \\ \hline
+       \hbox{iABC} & \hbox{B:9} & \hbox{C:9} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+       \hbox{iABx} & \hbox{Bx:18-1} & \hbox{Bx:18-2} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+       \hbox{iAsBx} & \hbox{sBx:18-1} & \hbox{sBx:18-2} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+       \hbox{iAx} & \hbox{Ax:26-1} & \hbox{Ax:26-2} & \hbox{Ax:26-3}  & \hbox{Opcode:6} \\ \hline
+    \end{tabular}
+\end{center}
+在lua5.4中opcode由6位变成了7位。
+
+编码模式中的字母含义i表示指令instruction，x表示扩展extended，s表示符号signed，字母ABC表示三个参数，A一般用作
+目标寄存器索引，B和C既可以是寄存器索引，也可以是常量池索引
+
+\begin{itemize}
+    \item {iABC
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|} \hline
+           \hbox{} & \hbox{31-24} & \hbox{23-16} & \hbox{15-8} & \hbox{0-7} \\ \hline
+           \hbox{5.3} & \hbox{B:9} & \hbox{C:9} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+           \hbox{5.4} & \hbox{C:8C:8} & \hbox{B:8-k} & \hbox{A:8}  & \hbox{Opcode:7} \\ \hline
+        \end{tabular}
+    \end{center}
+    }
+    \item {iABx}
+    \item {iAsBx}
+    \item {iAx}
+    \item {isJ}
+\end{itemize}
+
+基本的四个指令形式，iABC、iABx、iAsBx、iAx。sBx表示signed int。生成lua代码对应的指令的
+
+luac -l -l src.lua
+
+通过上面命令编译后，可以得到编译后的指令代码。

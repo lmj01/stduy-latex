@@ -1,0 +1,79 @@
+% enginnering.tex
+
+\documentclass[UTF8,10pt]{report}
+
+%% 导言区，一般用于加载宏包
+% 目录
+\usepackage[titles]{tocloft}
+% 引入中文
+\usepackage{ctex} 
+% 超链接
+\usepackage[colorlinks,linkcolor=blue]{hyperref}
+\usepackage{url}
+% 引用
+\usepackage{cite}
+% \usepackage{natbib}
+% 图片
+\usepackage{graphicx}
+% 数学
+% 矩阵
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{arydshln}
+% 嵌入代码
+\usepackage{listings}
+\usepackage{listings-ext}
+
+% 给方程，图片，表格编号，section可能换成chapter
+\renewcommand{\theequation}{\arabic{section}-\arabic{equation}}
+\renewcommand{\thefigure}{\arabic{section}-\arabic{figure}}
+\renewcommand{\thetable}{\arabic{section}-\arabic{table}}
+
+\setlength{\baselineskip}{1.5em} % 行间距
+\setlength{\parskip}{1.0ex} % 段间距
+\setlength{\parindent}{0pt} % 段落缩进
+
+% 文档开始
+\begin{document}
+%-----使用封面代替
+%-----封面
+\begin{center}
+    \quad \\
+    \vspace{5cm}
+    \hspace{0cm}\Large{Lua} \\
+    \small{分析Lua技术} \\
+    \hspace{0cm}\Large{李美杰} \\
+    \hspace{0cm}\small{2020.11.22}
+    \clearpage
+\end{center}
+%-----
+
+%-----留白
+\thispagestyle{empty}
+\clearpage
+%-----
+
+%-----目录
+\tableofcontents
+\clearpage
+%-----
+
+% 代码区域样式
+\lstset{
+    language=C,
+    numbers=left,
+    frame=box
+}
+
+%-----正文
+\input{subpart/lua.tex}
+\input{subpart/chunk.tex}
+\input{subpart/opcode.tex}
+
+%-----参考文档
+\bibliographystyle{plain}
+\bibliography{lua.bib}
+%-----
+
+\end{document}

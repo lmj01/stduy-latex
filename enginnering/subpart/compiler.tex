@@ -1,14 +1,16 @@
-\chapter{编译器}
+\chapter{Compiler}
 编译器的技术就是翻译人与机器的沟通，体现在两方面，一是工程化需要，需要大量的交流，不能简简单单的操作硬件来完成；
 一是简化人的交流成本，特别在指定领域，快速的结果是推导前进的基础。
 
-\section{概念}
+\section{Conception}
 
-\subsection{自举}
+\subsection{bootstrap}
+bootstrap自举
 用低级语言先实现一个简单的编译器,然后用这个编译器的语言再去编写一个更高级的编译器.
 新编译器就是旧编译器的扩展,这个过程称为自举.
 
-\subsection{交叉编译}
+\subsection{Cross-Compilation}
+交叉编译
 不是每个设备都像PC这样便利，为其他设备进行软件开发的过程需要的技术。分两类
 \begin{itemize}
     \item {\textbf{小设备},如嵌入式或手机,在PC上完成编译过程,把打包的二进制放入小设备内存中运行.
@@ -17,7 +19,18 @@
     具有生成目标设备上的机器代码的功能}
 \end{itemize}
 
-\section{JIT}
+\section{Type System}
+
+Statically typed静态类型
+静态编程语言，如C、C++等
+
+Dynamically typed动态类型
+如JavaScript、lua等
+
+Gradual typing渐进类型\cite{AbstractingGradualTyping}
+如Java、C\#等，动态与静态结合，通过Type Annotated类实现部分动态
+
+\subsection{JIT}
 Just In Time,即时编译，混合了静态编译与动态解释，将频繁执行的代码编译成机器码缓存起来，对于执行一次的代码任然是
 逐行逐条解释执行的技术。
 \newline
@@ -74,5 +87,5 @@ Backus-Naur Form巴科斯范式，用来描述计算机语言语法的符号集�
     \item {常量表达式，在BNF中属于终结符}
 \end{itemize}
 
-\section{工具}
+\section{Tools}
 Lex \& Yacc是一套生成语法的工具，可以快速方便成型。相对于手写的词法器，具有一定的优势。

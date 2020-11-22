@@ -1,0 +1,60 @@
+\chapter{Chunk}
+
+Lua实现是把脚本编译成二进制的内部格式，然后给lua vm来执行，可以通过
+
+luac -l -l src.lua
+
+来编译脚本文件为二进制格式并保存到磁盘上。
+在lua的术语中，编译单位叫做chunk块，相应的编译后的二进制格式叫做binary chunk二进制块。
+
+和任何二进制格式(如WebAssembly模块的二进制格式等)一样，本质上就是一个字节流。在这个字节流内部，
+连续N个字节可以构成基础数据类型，如整数、浮点数等，基本数据类型又构成复合型数据类型，复合型数据类型
+又可以构成更复杂的数据类型。这个字节流就包含了这些数据结构，也就是二进制块的内容解释后的含义。
+
+字节流是由字节组成，字节的顺序就是很重要了，lua二进制块不像其他具有跨平台性质，如WebAssembly的字节采用
+Little-endian，lua直角使用机器的字节顺序。除byte和instruction类型，基本类型都是定长类型，但是定长数据类型的
+长度由可以因机器相关或编译时可配置的。
+
+
+\section{varint}
+Lua5.4引入了变长整数类型，目的是让二进制紧凑性更强了。这是因为lua二进制块中存储了很多整数，如调试用的行号、字符串等的长度，
+这些整数通常很小，但都占用了固定的长度，WebAssembly模块的二进制采用了LEB128来编码变长整数以节约空间，lua5.4采用类似的编码
+格式，存在的差异是
+\begin{itemize}
+    \item {LEB128是小端字节序，Lua使用大端字节序}
+    \item {都利用字节的MSB(Most Significant Bit)来标识是否有后续字节，LES128中MSB为1表示有后续，Lua则相反}
+\end{itemize}
+
+这里举例来说明一些过程，有一个整数N，可以用3字节来表示，那编码的流程有三个步骤
+\begin{itemize}
+    \item {第一步就是把这个3字节(24bit)分成四组，，每组7个bit，剩余bit补0占位}
+    \item {第二步是小端字节序，把字节位置颠倒}
+    \item {第三步是把0占位的MSB变成1}
+\end{itemize}
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|} \hline
+       \hbox{data} & \hbox{} & \hbox{xxxxxxxx} & \hbox{yyyyyyyy} & \hbox{zzzzzzzz} \\ \hline
+       \hbox{step1} & \hbox{00000xxx} & \hbox{0xxxxxyy} & \hbox{0yyyyyyz}  & \hbox{0zzzzzzz} \\ \hline
+       \hbox{step2} & \hbox{0zzzzzzz} & \hbox{0yyyyyyz} & \hbox{0xxxxxyy}  & \hbox{00000xxx} \\ \hline
+       \hbox{step3} & \hbox{1zzzzzzz} & \hbox{1yyyyyyz} & \hbox{1xxxxxyy}  & \hbox{00000xxx} \\ \hline
+    \end{tabular}
+\end{center}
+lua5.4因为大端的关系，只需要两步
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|} \hline
+       \hbox{data} & \hbox{} & \hbox{xxxxxxxx} & \hbox{yyyyyyyy} & \hbox{zzzzzzzz} \\ \hline
+       \hbox{step1} & \hbox{00000xxx} & \hbox{0xxxxxyy} & \hbox{0yyyyyyz}  & \hbox{0zzzzzzz} \\ \hline
+       \hbox{step3} & \hbox{00000xxx} & \hbox{0xxxxxyy} & \hbox{0yyyyyyz}  & \hbox{1zzzzzzz} \\ \hline
+    \end{tabular}
+\end{center}
+这里是对300整数进行编码的结果
+\begin{center}
+    \begin{tabular}{|c|c|c|} \hline
+       \hbox{binary} & \hbox{00000001} & \hbox{00101100} \\ \hline
+       \hbox{LES128} & \hbox{10101100} & \hbox{00000001} \\ \hline
+       \hbox{Lua5.4} & \hbox{00000010} & \hbox{10101100} \\ \hline
+    \end{tabular}
+\end{center}
+
+这里要说明一下的是WebAssembly核心规范对WebAssembly模块的二进制格式进行了定义，但Lua的二进制格式完全属于实现细节，没有相应的规范，
+也不保证向后兼容性，其权威性就是Lua官方实现的C语言的源代码。
