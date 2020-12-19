@@ -1,11 +1,5 @@
 \chapter{Opcode}
 
-与WebAssemlby等虚拟机一样，Lua的vm指令也分为两个部分，操作码opcode和静态参数static arguments。
-指令在执行时，通常还需要动态参数，一般称作操作数operands。
-
-WebAssemlby采用了栈式Stack-based虚拟机模型，指令在执行时可以从操作数栈上压入、弹出操作数。而Lua
-采用了寄存器式Register-based虚拟机模型，指令在执行时可以操作一个虚拟寄存器，用于读写操作数。指令参数
-最主要的作用就是表示寄存器索引，这也是lua虚拟机采用定长指令的原因之一(WebAssemlby采用变长指令)。
 
 理解lua，先要理解它编译后的形态，是指令，就至少要到汇编级别来理解了，毕竟汇编的本质是CPU二进制指令的文本形式。
 
@@ -20,28 +14,73 @@ lua5.3的指令编码如下表所示
     \end{tabular}
 \end{center}
 在lua5.4中opcode由6位变成了7位。
+lua5.3中6bit支持64条指令，定义了47条，lua5.4中7bit有128条指令，定义了83条
 
-编码模式中的字母含义i表示指令instruction，x表示扩展extended，s表示符号signed，字母ABC表示三个参数，A一般用作
+操作数的是由剩下的bit来编码动态参数，其编码模式中的字母含义i表示指令instruction，x表示扩展extended，s表示符号signed，字母ABC表示三个参数，A一般用作
 目标寄存器索引，B和C既可以是寄存器索引，也可以是常量池索引
 
 \begin{itemize}
     \item {iABC
-    \begin{center}
-        \begin{tabular}{|c|c|c|c|c|} \hline
-           \hbox{} & \hbox{31-24} & \hbox{23-16} & \hbox{15-8} & \hbox{0-7} \\ \hline
-           \hbox{5.3} & \hbox{B:9} & \hbox{C:9} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
-           \hbox{5.4} & \hbox{C:8C:8} & \hbox{B:8-k} & \hbox{A:8}  & \hbox{Opcode:7} \\ \hline
-        \end{tabular}
-    \end{center}
+        \begin{center}
+            \begin{tabular}{|c|c|c|c|c|} \hline
+            \hbox{} & \hbox{31-24} & \hbox{23-16} & \hbox{15-8} & \hbox{0-7} \\ \hline
+            \hbox{5.3} & \hbox{B:9} & \hbox{C:9} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+            \hbox{5.4} & \hbox{C:8} & \hbox{B:8-k} & \hbox{A:8}  & \hbox{Opcode:7} \\ \hline
+            \end{tabular}
+        \end{center}
+        大部分指令都是iABC模式，lua5.3中的指令，参数B和C即可以表示寄存器索引，也可以表示常量池索引，如果最高位为1表示常量池索引，
+        否则为寄存器索引，如下        
+        \begin{lstlisting}
+            OP_ADD,/* A B C R(A) := RK(B) + RK(C)*/
+        \end{lstlisting}
+        lua5.4中B和C仅表示寄存器索引，为了能够使用常量池中的常量，新添加了ADDK指令
+        \begin{lstlisting}
+            OP_ADD, /* A B C R(A) := R(B) + R(C)*/
+            OP_ADDK,/* A B C R(A) := R(B) + K(C)*/
+        \end{lstlisting}        
     }
-    \item {iABx}
-    \item {iAsBx}
-    \item {iAx}
-    \item {isJ}
+    \item {iABx
+        \begin{center}
+            \begin{tabular}{|c|c|c|c|} \hline
+            \hbox{} & \hbox{31-16} & \hbox{15-8} & \hbox{0-7} \\ \hline
+            \hbox{5.3} & \hbox{Bx:18} & \hbox{A:8}  & \hbox{Opcode:6} \\ \hline
+            \hbox{5.4} & \hbox{Bx:17} & \hbox{A:8}  & \hbox{Opcode:7} \\ \hline
+            \end{tabular}
+        \end{center}
+        以LOADK指令为例，
+        \begin{lstlisting}
+            OP_LOADK, /* A Bx R(A) := Kst(Bx) lua5.3 */
+            OP_LOADK, /* A Bx R[A] := K[Bx]   lua5.4 */
+        \end{lstlisting}                
+    }
+    \item {iAsBx与iABx基本一样，区别是参数B需要被解释为有符号整数。\textbf{对应有符号整数参数，lua并没有采用二的补码Two's Complement，而是采用了偏移二进制Offset Binary,又称为Excess-K编码格式}}
+    \item {iAx指令模式只有EXTRAARG指令使用，这是一条伪指令，不能单独执行，只能跟着特定指令后面，为这些指令提供额外扩展参数，}
+    \item {isJ是lua5.4新增的指令模式，只有JMP指令使用此模式，sJ表示跳转的PC偏移量}
 \end{itemize}
 
-基本的四个指令形式，iABC、iABx、iAsBx、iAx。sBx表示signed int。生成lua代码对应的指令的
+\section{Excess-K}
+这种整数编码方式将可以表示最小负整数编码为全0，表示最大正整数编码为全1，其余整数按大小顺序分布在两者之间。
+以4bit整数为例来说明
+\begin{center}
+    \begin{tabular}{|c|c|c|c|} \hline
+    \hbox{} & \hbox{Binary} & \hbox{Two's Complement} & \hbox{Excess-K} \\ \hline
+    \hbox{0} & \hbox{0000} & \hbox{0}  & \hbox{-8} \\ \hline
+    \hbox{1} & \hbox{0001} & \hbox{1}  & \hbox{-7} \\ \hline
+    \hbox{2} & \hbox{0010} & \hbox{2}  & \hbox{-6} \\ \hline
+    \hbox{3} & \hbox{0011} & \hbox{3}  & \hbox{-5} \\ \hline
+    \hbox{4} & \hbox{0100} & \hbox{4}  & \hbox{-4} \\ \hline
+    \hbox{5} & \hbox{0101} & \hbox{5}  & \hbox{-3} \\ \hline
+    \hbox{6} & \hbox{0110} & \hbox{6}  & \hbox{-2} \\ \hline
+    \hbox{7} & \hbox{0111} & \hbox{7}  & \hbox{-1} \\ \hline
+    \hbox{8} & \hbox{1000} & \hbox{-8}  & \hbox{0} \\ \hline
+    \hbox{9} & \hbox{1001} & \hbox{-7}  & \hbox{1} \\ \hline
+    \hbox{10} & \hbox{1010} & \hbox{-6}  & \hbox{2} \\ \hline
+    \hbox{11} & \hbox{1011} & \hbox{-5}  & \hbox{3} \\ \hline
+    \hbox{12} & \hbox{1100} & \hbox{-4}  & \hbox{4} \\ \hline
+    \hbox{13} & \hbox{1101} & \hbox{-3}  & \hbox{5} \\ \hline
+    \hbox{14} & \hbox{1110} & \hbox{-2}  & \hbox{6} \\ \hline
+    \hbox{15} & \hbox{1111} & \hbox{-1}  & \hbox{7} \\ \hline
+    \end{tabular}
+\end{center}
 
-luac -l -l src.lua
 
-通过上面命令编译后，可以得到编译后的指令代码。

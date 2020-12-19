@@ -1,0 +1,51 @@
+\chapter{Virtual Machine}
+
+从lua1.0就内置了虚拟机，lua脚本并不是直接被lua解释器解释执行，而是先由lua编译器编译为字节码，然后交给lua虚拟机执行。
+
+Lua5.0\cite{tiollua5}实现参考文章
+
+高级编程语言虚拟机是对真实计算机的模拟和抽象，如同真实机器有一套自己的指令集一样，虚拟机也有自己的指令集，按照实现方式，可分为
+\begin{itemize}
+    \item {Stack-based基于栈的虚拟机需要使用PUSH指令往栈顶压入值、弹出值，其他指令则是对栈顶值进行操作，特点是指令个数多指令长度较短}
+    \item {Register-based基于寄存器的虚拟机由于直接对寄存器进行寻址，特点是指令个数少指令长度长}
+\end{itemize}
+
+与WebAssemlby等虚拟机一样，Lua的vm指令也分为
+\begin{itemize}
+    \item {操作码opcode}
+    \item {静态参数static arguments}
+\end{itemize}
+
+指令在执行时，通常还需要动态参数，一般称作操作数operands。
+
+从汇编的本质是CPU二进制指令的文本形式角度来看，指令集对应的是字节码的二进制形式。
+
+在lua术语中，一段可以被lua解释器解释执行的字节码被称作chunk。
+
+\section{编译期}
+
+广义编译期会把编译过程分为不同的阶段，每个解读通过管道pipeline来串联形成完整的编译期。
+主要编译阶段有
+\begin{itemize}
+    \item {前端Front End}
+    \begin{itemize}
+        \item {预处理}
+        \item {词法分析}
+        \item {语法分析}
+        \item {语义分析}
+        \item {中间代码生成}
+    \end{itemize}
+    \item {中端Middle End}
+    \begin{itemize}
+        \item {中间代码优化}
+    \end{itemize}
+    \item {后端Back End}
+    \begin{itemize}
+        \item {目标代码生成}
+    \end{itemize}
+\end{itemize}
+
+Lua语言不支持宏特性、不需要预处理，又是动态语言，语义分析也不需要。
+lua编译过程中是一次遍历就生成指令的，并没有对源码和语法结构多次遍历，是通过指令回填技术来实现支持顺序的。
+
+Lua解析与代码生成的内部实现\cite{parsingAndCodeGeneration}

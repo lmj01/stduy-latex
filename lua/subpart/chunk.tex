@@ -1,11 +1,6 @@
 \chapter{Chunk}
 
-Lua实现是把脚本编译成二进制的内部格式，然后给lua vm来执行，可以通过
-
-luac -l -l src.lua
-
-来编译脚本文件为二进制格式并保存到磁盘上。
-在lua的术语中，编译单位叫做chunk块，相应的编译后的二进制格式叫做binary chunk二进制块。
+Lua实现是把脚本编译成二进制的内部格式，然后给lua vm来执行，在lua的术语中，编译单位叫做chunk块，相应的编译后的二进制格式叫做binary chunk二进制块。
 
 和任何二进制格式(如WebAssembly模块的二进制格式等)一样，本质上就是一个字节流。在这个字节流内部，
 连续N个字节可以构成基础数据类型，如整数、浮点数等，基本数据类型又构成复合型数据类型，复合型数据类型
@@ -14,6 +9,9 @@ luac -l -l src.lua
 字节流是由字节组成，字节的顺序就是很重要了，lua二进制块不像其他具有跨平台性质，如WebAssembly的字节采用
 Little-endian，lua直角使用机器的字节顺序。除byte和instruction类型，基本类型都是定长类型，但是定长数据类型的
 长度由可以因机器相关或编译时可配置的。
+
+lua\_load会对chunk编译生成一个mainfunc proto，内部所有函数都对应一个proto。整个过程就是以
+mainfunc为根节点的proto树结构。
 
 
 \section{varint}
@@ -58,3 +56,17 @@ lua5.4因为大端的关系，只需要两步
 
 这里要说明一下的是WebAssembly核心规范对WebAssembly模块的二进制格式进行了定义，但Lua的二进制格式完全属于实现细节，没有相应的规范，
 也不保证向后兼容性，其权威性就是Lua官方实现的C语言的源代码。
+
+
+\section{luac}
+luac主要有两个用途，一是作为编译期，把lua源文件编译成二进制chunk文件；一是作为反编译器，分析二进制chunk，将信息输出到控制台。
+
+luac -l -l src.lua
+
+通过上面命令编译后，可以得到编译后的指令代码。
+
+或者直接
+>./luac -l -l -
+> local t = {}; t[0] = 1; local a = t[0]
+> Ctrl+D
+这样可以一次性看到编译后的二进制块
