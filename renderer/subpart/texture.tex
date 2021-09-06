@@ -1,0 +1,376 @@
+\chapter{Texture}
+
+\begin{abstract}
+    纹理是比直接用颜色值更具有连续性, 对每个光栅化的屏幕坐标(usually a pixel center), 
+    算出它的uv坐标(利用三角形顶点重心坐标插值using barycentric coordinates), 
+    用uv坐标去查询texture上的颜色值,把这个颜色值当作
+    漫反射系数Kd使用albedo Kd(Blinn-Phong reflectance model)
+    \begin{enumerate}
+        \item \text{for each rasterized screen sample(x,y):}
+        \begin{enumerate}
+            \item \text{(u,v) = evaluate texture coordinate at (x,y)}
+            \item \text{texcolor = texture.sample(u,v)}
+            \item \text{set sample's color to texcolor}
+        \end{enumerate}
+    \end{enumerate}    
+\end{abstract}
+
+可阅读
+Chapter 20 Textures and Texture Mapping\cite{CGPP3ed}
+
+Chapter 11 Texture Mapping\cite{FCG4ed}
+
+Chapter 6 Texturing\cite{RTR4ed}
+
+\section{Texture Mapping}
+纹理映射，即纹理坐标的生成函数，纹理空间之内任意一个二维坐标都在[0,1]之内。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/texture-mapping-sphere.jpg}
+    \caption{地球仪}    
+\end{figure}
+
+纹理应用在表面的大致逻辑是
+\begin{lstlisting}
+    Color texture_lookup(Texture t, float u, float v) {
+        int i = round(u * t.width() - 0.5);
+        int j = round(v * t.height() - 0.5);
+        return t.get_pixel(i,j);
+    }
+    Color shade_surface_point(Surface s, Point p, Texture t) {
+        Vector normal = s.get_normal(p);
+        (u,v) = s.get_texcoord(p);
+        Color diffuse_color = texture_lookup(t, u, v);
+        // compute shading using diffuse_color and normal 
+        // return shading result    
+    }
+\end{lstlisting}
+就是对每个光栅化的屏幕坐标算出它的uv坐标(利用三角形顶点重心坐标插值)，再利用uv坐标取查询texture
+上的颜色，把这个颜色信息当作漫反射系数Kd。
+
+
+以顶视图Y轴方向来看，对X(S)和Z(T)生成对应的纹理坐标值UV,即Y平面为UV展开
+
+\begin{enumerate}
+    \item \textsf{遍历所有点得到lowestX和highestX，lowestX=-12.00,highestX=134.56}
+    \item \textsf{得到绝对范围 range=(lowest - highest) * -1 = (-12.00-134.56)*-1=146.56}
+    \item \textsf{与0的偏移值offset=0-lowestX=0 - (-12.00)=12}
+    \item \textsf{vertex x=87.45, absoluteX=X+offset=87.45+12=99.45}
+    \item \textsf{get S value, s = absoluteX / range = 99.45/145.56=0.679}
+    \item \textsf{do the same for Z axis to get T value}
+\end{enumerate}
+
+从Image Space到Texture space(T), 存在一个函数映射，从World space中Surface(S), 数学模型如下：
+
+\begin{align*}
+    \phi &: S \rightarrow T \\
+    &: (x,y,z) \rightarrow (u,v)
+\end{align*}
+
+函数$\phi$存在很多种形式
+
+\subsection{Basic Texturing}
+
+是最基本的纹理映射，仿射粘贴(affine gluing)，把图像粘贴到一个三角形，通过三角形的三个顶点指定纹理坐标方式，
+顶点存储uv值，并在特定的texture中获取相应的值即可，即最广义的纹理贴图。
+
+\subsection{Planar Projection}
+
+
+orthographic viewing $M_{t}$是变换矩阵
+
+\begin{align*}
+    \phi(x,y,z) = (u,v) \qquad where 
+    \begin{bmatrix} u \\ v \\ * \\ 1 \end{bmatrix} = M_{t} 
+    \begin{bmatrix} x \\ y \\ z \\ 1 \end{bmatrix}
+\end{align*}
+
+perspective viewing $P_{t}$是投影矩阵
+
+\begin{align*}
+    \phi(x,y,z) = (u/w,v/w) \qquad where 
+    \begin{bmatrix} u \\ v \\ * \\ w \end{bmatrix} = P_{t} 
+    \begin{bmatrix} x \\ y \\ z \\ 1 \end{bmatrix}
+\end{align*}
+
+
+\subsection{Sphereical Coordinates}
+
+\begin{equation}
+    \phi(x,y,z) = ([\pi+atan2(y,x)]/2\pi,[\pi-acos(z/s\|x\|)]/\pi)
+\end{equation}
+
+\subsection{Cylindrical Coordinates}
+
+\begin{align*}
+    \phi(x,y,z) = (\frac{1}{2\pi}[\pi+atan2(y,x)]/2\pi,\frac{1}{2}[1+z])
+\end{align*}
+
+\subsection{Cubemaps}
+
+纹理可以在围绕被渲染物体的距离上建模环境，如使用6个正方形纹理表示一个环绕场景的大立方体的面，
+每个纹理像素表示顺着环境中一个方向看过去的色彩，GLSL提供一个专门的samplerCube数据类型来支持。
+在顶点着色过程中，把顶点的材料处理为一个完美镜面并且从合适的入射方向获取环境数据。
+\begin{align*}
+    \phi(x,y,z) \mapsto (\frac{x}{z},\frac{y}{z})
+\end{align*}
+
+\subsection{Interpolated Texture Coordinates }
+
+\begin{description}
+    \item [distortion] \textsf{映射关系是一个连续的函数，就存在失真，扭曲，畸变}
+    \item [seam] \textsf{拓扑可以展开为平面，但是因为顶点可能有多个uv值，会出现缝隙问题，边界过渡问题}
+\end{description}
+
+\subsection{UV Unwrapping}
+
+UV展开就是把物体的表面映射到平面图像上的过程。为了让弯曲的表面信息也能在平面上被精准存放下来，对切割线seam的要求
+
+\section{Normal Mapping}
+法线映射，来自一个纹理的rgb数值被当作顶点的法线的xyz，因为法线取值范围是[-1,1]，而rgb取值范围是[0,1],法线已纹理
+数据存储使会转换
+$$
+rgb = \frac{normal_xyz}{2.0} + 0.5
+$$
+在Fragment Shader中需要转换会色彩值
+$$
+normal_xyz = 2 \times rgb - 1
+$$
+
+\section{Bump Map}
+
+为增加表面法向量细节，如一个平面法向量处处相同，即时使用纹理，光照效果仍然不够真实，可以增加扰动表面面皮的法向量，
+从而形成比较真实的效果。
+
+纹理贴图存储的是颜色值，而Bump Map存储的是凹凸数据，通常是高度值。
+Bump Map是Phong Shading的一项扩展，因为表面法线用来计算顶点的光亮，而Bump Map就是为了影响法线的改变，最终影响颜色值。
+所以算是一种负责光方向的纹理映射，不同的凹凸数据，使用不同的方法来影响法线。
+
+\begin{itemize}
+    \item \text{Emboss Bump Map}
+    \item \text{DOT3 Bumap Map}
+\end{itemize}
+
+\subsection{Normal Map}
+
+是实时渲染中，通常使用凹凸贴图的变种法线贴图，bluish texture偏蓝色纹理，法线贴图在纹理的每个像素中存储一个颜色。
+有两种方法生成法线贴图
+\paragraph{灰度图}
+预先计算每个像素与其垂直和水平相邻像素之间的差别，将两个结果数字（导数）转换为单位法线并存储为颜色
+\paragraph{精模烘焙法线}
+把纹理的每个像素与精模的表面位置结合起来，将其结果编码为法线存储为颜色值
+
+为使生成的纹理可以在任意旋转下均反复使用，存储的法线必须在\textbf{切线空间}中，切线空间由三个向量normal法线，tangent切线，binormal副法线组成。
+切线空间决定了表面的朝向。
+
+切线空间的映射依赖物体的UV纹理，因为UV纹理中的决定世界空间中的切线空间的两个向量，切线和副法线。
+生成较好的UV纹理在切线空间中不穿帮是比较困难和耗时的。
+
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{images/normal_map_tnb.png}
+    \includegraphics[width=0.8\textwidth]{images/normal_map_tnb_in_object_space.png}
+\end{center}
+假设三角形的三个顶点为$V_{0},V_{1},V_{2}$,对应的纹理坐标为$(u_{0},v_{0}),(u_{1},v_{1}),(u_{2},v_{2})$
+
+\begin{gather*}
+    \because \overrightarrow{e_{0}} = V_{1} - V_{0} \\ 
+    \overrightarrow{e_{1}} = V_{2} - V_{0} \\ 
+    \therefore (\Delta u_{0},\Delta v_{0}) = (u_{1} - u_{0}, v_{1} - v{0}) \\ 
+    (\Delta u_{1}, \Delta v_{1}) = (u_{2} - u_{0}, v_{2} - v_{0}) \\ 
+    \because \overrightarrow{e_{0}} = \Delta u_{0} \ast \overrightarrow{T} + \Delta v_{0} \ast \overrightarrow{B} \\
+    \overrightarrow{e_{1}} = \Delta u_{1} \ast \overrightarrow{T} + \Delta v_{1} \ast \overrightarrow{B} \\
+    \therefore \begin{bmatrix}
+        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
+        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
+    \end{bmatrix} = \begin{bmatrix}
+        \Delta u_{0} & \Delta v_{0} \\ 
+        \Delta u_{1} & \Delta v_{1}
+    \end{bmatrix} \begin{bmatrix}
+        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
+        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
+    \end{bmatrix} \\ 
+    \begin{bmatrix}
+        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
+        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
+    \end{bmatrix} = \begin{bmatrix}
+        \Delta u_{0} & \Delta v_{0} \\ 
+        \Delta u_{1} & \Delta v_{1}
+    \end{bmatrix}^{-1} \begin{bmatrix}
+        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
+        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
+    \end{bmatrix} \\ 
+    \because  \begin{bmatrix}
+        \Delta u_{0} & \Delta v_{0} \\ 
+        \Delta u_{1} & \Delta v_{1}
+    \end{bmatrix}^{-1} = \frac{1}{\Delta u_{0} \Delta v_{1} - \Delta v_{0} \Delta u_{1}} \begin{bmatrix}
+        \Delta v_{1} & -\Delta v_{0} \\ 
+        -\Delta u_{1} & \Delta u_{0}
+    \end{bmatrix} \\ 
+    \therefore \begin{bmatrix}
+        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
+        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
+    \end{bmatrix} = \frac{1}{\Delta u_{0} \Delta v_{1} - \Delta v_{0} \Delta u_{1}} \begin{bmatrix}
+        \Delta v_{1} & -\Delta v_{0} \\ 
+        -\Delta u_{1} & \Delta u_{0}
+    \end{bmatrix} \begin{bmatrix}
+        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
+        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
+    \end{bmatrix} 
+\end{gather*}
+通常直接传入每个顶点的法线和切线，可得到每个顶点在世界坐标系中的法线坐标和切线坐标值。N为顶点在世界坐标的法线，
+则切线$T^{'} = T - (N \cdot T)N $,这样保证N与$ T^{'} $是正交的，则$B=N \times T^{'}$. 得到切线坐标系中的坐标值，
+可以构造一个矩阵，将切线空间中的法线坐标变换到世界坐标，以得到法线坐标。
+\begin{gather*}
+    \begin{bmatrix}
+        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
+        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z \\ 
+        \overrightarrow{N}.x & \overrightarrow{N}.y & \overrightarrow{N}.z 
+    \end{bmatrix}
+\end{gather*}
+
+\subsection{Height Map}
+高度图是存储高度信息的数据，通常计算XY方向上的倾斜度
+
+\begin{gather*}
+    x_gradient = pixel(x-1,y) - pixel(x+1,y) \\
+    y_gradient = pixel(x,y-1) - pixel(x,y+1) \\
+    normalNew = normal + (U * x_gradient) + (V * y_gradient)
+\end{gather*}
+
+在的Bump Map\cite{CGPP3ed}中，有一个公式更加通用
+
+\begin{align*}
+    n^{'} = S(n + rt_{1} + gt_{2})
+\end{align*}
+
+它描述了两个方向上向量对法线的影响
+
+\section{Multipass}
+
+更复杂的渲染效果是在场景几何体上借助多次渲染来达到效果。除final pass外都是离线存储且
+不被绘制到屏幕上，非final pass被渲染到Frame Buffer Object的某种数据结构中，这些FBO作为一个
+纹理作为next rendering pass的输入数据。
+
+\subsection{Refection Mapping}
+反射映射是multipass最简单的例子，让一个被渲染对象被镜面化，并反射出场景中其他对象。
+流程是首先渲染场景的其余部分，从渲染对象的中心观看的结果，即已中心为视点渲染6个图像，
+\text{分别看向左、右、前、后、上、下六个图像}，
+\text{每个图像都是90度的垂直和水平视域(field of view)},
+得到的数据就是一个cubeMap, 虽然这样的计算并非完全正确，但是给人一种可信的画面了，真正的反射是从
+渲染对象的每一个点观察到合适的反射射线。
+
+\subsection{Shadow Mapping}
+阴影映射，在简单光照模型中，一个顶点上的色彩值不依赖场景中剩余的渲染对象，而真实世界中，
+在表面点(顶点的法线的垂直面)与光源之间存在一个遮挡的对象，那么这个顶点就处于阴影中，会显得更暗些。
+
+为实现这种情况下的真实性，借助multipass来模拟，思路是首先从光的视角生成并存储一个zBuffer的纹理，
+随后从视角所看到与从光源视角看到的进行比较，如果从视角中看到的点而从光源视角没有看到，那么这个顶点
+一定被某对象遮挡住。思路首先从光源视角渲染一个FBO，只存储深度值的FBO，再从视角渲染场景，对每个点与
+存储在FBO中的深度值与当前顶点的深度值比较。
+
+
+\subsubsection{Shadow Map}
+
+可参考Advanced Lighting\cite{LearnOpenGL}
+
+创建阴影的步骤：
+\paragraph{一} 
+以光源为视点，投影渲染整个场景，得到深度图ShadowMap并保存变换矩阵。ShadowMap中以光源为视点
+时，所有可视点的深度。注意投影的区别：如果是DirectionLight则是正交投影，如果是PointLight,SpotLight则是透视投影
+
+\paragraph{二}
+以相机为视点渲染，对场景中的每个顶点，将其变换到以光源为视点的空间，若其深度大于ShadowMap中对应点
+深度值，说明光源射来的光线被物体遮挡了，则该点处于阴影中。
+
+运用渲染到纹理方法render to target，以场景中的光源为坐标原点，建立光源坐标系，就是场景深度
+把render target（一般是R32F的surface）就是Shadow Map。 
+
+接着正常render frame buffer， 启用depth buffer，将场景中的世界坐标的物体转化到以光源为基准的
+投影坐标系中
+
+世界坐标 $\rightarrow$ 物体坐标 $\rightarrow$ 光源坐标 $\rightarrow$ 光源视图坐标 $\rightarrow$ 光源投影坐标
+
+任何在fragment shader中比较深度值，深度值小于shadow map对应的深度，就是光源照射地方，否则就是照射不到地方。
+比较深度值时要把坐标转换为窗口坐标，因为shadow map是render to target的surface的结果。
+
+\begin{itemize}
+    \item [优点] \text{不用像volume那样去计算所有对象形状，只产生一直map}
+    \item [缺点] \text{阴影有锯齿，比较深度值时就两种值，有阴影1和无阴影0，在阴影的边缘0和1交替出现而产生锯齿}
+\end{itemize}
+
+\paragraph{Shadow acne}
+\begin{center}
+    \includegraphics[width=0.4\textwidth]{images/shadow_acne.png}
+    \includegraphics[width=0.4\textwidth]{images/shadow_acne_offset.png}
+\end{center}
+ShadowMap的分辨率有限，很容易产生阶梯状的边缘，每个Texel对应场景中的一个区域，如左边的图，点$p_{1}$和$p_{2}$对应屏幕上
+不同的点，有$d(p_{1})>s, d(p_{2})<2$，点$p_{1}$也处在阴影中，解决的办法就是给shadow map中的深度值进行一个常量的偏移。
+
+当三角形相对于光源而言，斜率过大，就需要一个非常大的偏移，就出现如下图所示的效果
+\paragraph{Shadow Peter-pinning}
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{images/shadow_peter-pinning.png}
+\end{center}
+为解决这种问题，图形显卡通过一种slope scaled bias的光栅化状态进行内置支持。
+
+\paragraph{Shadow Bias}
+
+\begin{gather*}
+    bias = factorSlope \times slope + constantBias
+\end{gather*}
+
+\subsubsection{Hard \& Soft}
+
+生成的阴影，其边缘没有过渡的，就会产生锯齿现象，而现实世界中的阴影边缘过渡得渐变很明显。
+无渐变的shadow称为Hard Shadow，有渐变的称为Soft Shadow。为了产生渐变，就不能简单进行比较判断，得到是否的结果，
+这就是shadow filtering的内容。
+
+PCF(Perecentage Closer Filter), 将深度比较的结果0和1存储在一个render target里面，然后对其进行过滤操作，
+产生值为0.2，0.5，...等灰度值的，即soft shadow。消耗时间较长，就简化成横向或纵向过滤，减少采样数量。
+
+CSM(convolution shadow map), 此方法基于阴影重建，深度值比较的结果要么是1，要么是0，从而构造一个x坐标为[-1,1],
+y坐标为[0,1]的函数，对函数进行FFT变换，运用基准函数sin和cos来重新构建shadow map。 
+
+VSM(variance shadow map), 此方法应用切尔雪夫不等式，
+
+\subsubsection{Perspective Aliasing}
+
+近处锯齿现象，shadow map的分辨率不够。在camera视角下，近处的分辨率较高，一小片段对应着大量的pixel，而光源视角下的shadow map精度
+并没有发生改变，就会大量的pixel对应着同一点，因而产生锯齿。 解决方案就是CSM(Cascaded Shadow Map),即一张不够，就多张来,
+可参考微软的CSM\cite{CSM-msdn}
+
+\section{Texture Sampling}
+
+前面说了纹理映射，如果是一一对应很好理解，找到对应的就行了，但现实中更复杂的是对特别小resolution低，
+或特别大resolution高的产生的问题的处理。
+
+
+\paragraph{low resolution}
+纹理小会走样失真，需要一些图像处理技术来处理，
+双线性插值Bilinear Interpolation是性价比很高的选择
+
+\paragraph{high resolution}
+纹理大会更走样失真，近处是锯齿Jaggies，远处是摩尔纹Moire。从信号的角度来看，就是采样频率过低无法还原信号源。
+从透视的近大远小的原因，用远小的像素来表示面片的真实像素，自然会失真。
+
+\paragraph{Upsampling}
+上采样，
+放大Magnification图像，基本是内插值方法，在原有像素点之间采样某种插值算法插入新的像素
+
+\paragraph{Downsampling}
+下(降)采样，
+缩小Minification图像，把图像视口变小，原来多个像素的均值作为一个目标像素存储
+
+\paragraph{Supersampling}
+超采样，就是一个源像素大到一个区域事，把这个源像素细分为更多的子像素，获取子像素的采样，这种算法的计算量是几何倍数增长
+
+\paragraph{Mipmap}
+最理想的方法就是一一对应的查询，Mip comes from the Latin "multum in parvo", meaning a multitude in a small space.
+
+
+\section{Color Space}
+sRGB/RGB color space, linear/gamma space, 
+
+设计师的眼睛与屏幕的显式因素
+

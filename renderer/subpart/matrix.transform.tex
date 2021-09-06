@@ -1,0 +1,267 @@
+\section{Matrix Transform}
+
+\paragraph{major}
+row-major和column-major表示的是矩阵数据的内存布局memory layout。row-major表示矩阵的连续16个元素，
+每四个连续的element表示矩阵的一行：
+
+\begin{gather*}
+    M_{row-major} = 
+    \begin{bmatrix}
+        m_{0} & m_{1} & m_{2} & m_{3} \\ 
+        m_{4} & m_{5} & m_{6} & m_{7} \\
+        m_{8} & m_{9} & m_{10} & m_{11} \\
+        m_{12} & m_{13} & m_{14} & m_{15}
+    \end{bmatrix}
+\end{gather*}
+
+column-major的布局，是每四个连续的element表示矩阵的一列：
+
+\begin{gather*}
+    M_{column-major} = 
+    \begin{bmatrix}
+        m_{0} & m_{4} & m_{8} & m_{12} \\ 
+        m_{1} & m_{5} & m_{9} & m_{13} \\
+        m_{2} & m_{6} & m_{10} & m_{14} \\
+        m_{3} & m_{7} & m_{11} & m_{15}
+    \end{bmatrix}
+\end{gather*}
+
+在实际中，row-major是比较符合四维习惯的，一些库如glm用的是column-major，
+GLSL使用column-major存储矩阵
+
+\paragraph{约定}
+\par
+$V$表示一个向量，$P$表示一个点，$M$表示一个矩阵，
+\par
+当矩阵右乘向量时，即$M \ast V^T$，$V^T$ 是一个列向量。
+\par
+当矩阵左乘向量时，即$V \ast M$, $V$是一个行向量。
+\par
+本小节中以右乘列向量矩阵形式
+
+\subsection{平移矩阵}
+
+在齐次坐标中，用$(x,y,z,1)$表示点，用$(x,y,z,0)$表示向量。
+把点$P$平移Offset(x,y,z),则平移矩阵和其逆矩阵分别是
+
+\begin{gather*}
+    M_{T} \ast P^T = 
+    \begin{bmatrix}
+        1 & 0 & 0 & x \\ 
+        0 & 1 & 0 & y \\
+        0 & 0 & 1 & z \\
+        0 & 0 & 0 & 1
+    \end{bmatrix} \ast P^T, 
+    M_{T}^{-1} = 
+    \begin{bmatrix}
+        1 & 0 & 0 & -x \\ 
+        0 & 1 & 0 & -y \\
+        0 & 0 & 1 & -z \\
+        0 & 0 & 0 & 1
+    \end{bmatrix}
+\end{gather*}
+
+\subsection{缩放矩阵}
+
+相对于点$P$所在坐标系的原点进行缩放$Scale(x,y,z)$， 则缩放矩阵和其逆矩阵分别是
+
+\begin{gather*}
+    M_{S} \ast P^T = 
+    \begin{bmatrix}
+        x & 0 & 0 & 0 \\ 
+        0 & y & 0 & 0 \\
+        0 & 0 & z & 0 \\
+        0 & 0 & 0 & 1
+    \end{bmatrix} \ast P^T,
+    M_{S}^{-1} = 
+    \begin{bmatrix}
+        x^{-1} & 0 & 0 & 0 \\ 
+        0 & y^{-1} & 0 & 0 \\
+        0 & 0 & z^{-1} & 0 \\
+        0 & 0 & 0 & 1
+    \end{bmatrix} 
+\end{gather*}
+
+\subsection{旋转矩阵}
+先从XY平面上，将$V_{1}(cos\theta_{1}, sin\theta_{1})$旋转$\theta$角度后到$V_{2}(cos\theta_{2}, sin\theta_{2})$
+就有
+\begin{gather*}
+    MV_{1}^{T} = V_{2}^{T}
+    \Leftrightarrow  
+    \begin{bmatrix}
+        M_{11} & M_{12} \\ 
+        M_{21} & M_{22}
+    \end{bmatrix} 
+    \begin{bmatrix}
+        cos\theta_{1} \\ 
+        sin\theta_{1}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        cos\theta_{2} \\ 
+        sin\theta_{2}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        cos(\theta_{1} + \theta) \\ 
+        sin(\theta_{1} + \theta)
+    \end{bmatrix} 
+\end{gather*}
+可以推理得到
+\begin{gather*}
+    M_{11}cos\theta_{1} + M_{12}sin\theta_{1} = cos(\theta_{1}+\theta) = cos\theta cos\theta_{1} - sin\theta sin\theta_{1} \\
+    M_{21}cos\theta_{1} + M_{22}sin\theta_{1} = sin(\theta_{1}+\theta) = sin\theta cos\theta_{1} - cos\theta sin\theta_{1} \\
+    \Leftrightarrow M =   
+    \begin{bmatrix}
+        cos\theta & -sin\theta \\ 
+        sin\theta & cos\theta
+    \end{bmatrix} 
+\end{gather*}
+有了一般的二维旋转，现在推广至三维，从绕$X,Y,Z$轴旋转的变换矩阵推导开始，从绕$Z$轴旋转的变换矩阵推导开始，
+绕$Z$轴就是对XY平面进行旋转，就是改变从基(frame)$E X(1,0,0),Y(0,1,0),Z(0,0,1)$变换到另一组
+\par
+基(frame)$E^{'} X^{'}(cos\theta,sin\theta,0),Y^{'}(-sin\theta,cos\theta,0),Z^{'}(0,0,1)$
+\par
+设在基$E$下的变换矩阵为$R_{Z}$, 则有
+\begin{gather*}
+    \begin{bmatrix}
+        X^{'} & Y^{'} & Z^{'}
+    \end{bmatrix} =   
+    \begin{bmatrix}
+        X & Y & Z
+    \end{bmatrix} R_{Z} = R_{Z}
+\end{gather*}
+这个等式叫做基变换公式，$R_{Z}$叫做过渡矩阵。注意到基$E$是坐标轴单位向量构成的标准正交基，它是单位矩阵。
+\par
+现在分析一个向量绕$Z$轴旋转和$R_{Z}$的关系，假设这个向量在基$E$变换后的坐标为
+\begin{gather*}
+    V^{T} = (v_{x}, v_{y}, v_{z})^{T}
+\end{gather*}
+经过旋转变换后，向量在旋转后的坐标系中与坐标轴的相对位置关系不变，所以在新基$E^{'}$坐标系下的坐标还是$V^{T}$，
+设在原来的基$E$下的坐标为 
+\begin{gather*}
+    V^{'T} = (v_{x}^{'}, v_{y}^{'}, v_{z}^{'})^{T}
+\end{gather*}
+就有
+\begin{gather*}
+    V^{'T} = 
+    \begin{bmatrix}
+        X & Y & Z
+    \end{bmatrix} (v_{x}^{'}, v_{y}^{'}, v_{z}^{'})^{T} = 
+    \begin{bmatrix}
+        X^{'} & Y^{'} & Z^{'}
+    \end{bmatrix} (v_{x}, v_{y}, v_{z})^{T} = \\
+    \begin{bmatrix}
+        X & Y & Z
+    \end{bmatrix} R_{Z} (v_{x}, v_{y}, v_{z})^{T} \\
+    \Rightarrow (v_{x}^{'}, v_{y}^{'}, v_{z}^{'})^{T} = R_{Z} (v_{x}, v_{y}, v_{z})^{T} \\
+    \Rightarrow R_{Z} =  
+    \begin{bmatrix}
+        X^{'} & Y^{'} & Z^{'}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        cos\theta & -sin\theta & 0 \\
+        sin\theta & cos\theta & 0 \\
+        0 & 0 & 1
+    \end{bmatrix}
+\end{gather*}
+上述的旋转矩阵的坐标变换公式，可以从不同的角度来看待
+\par
+一是将基$E$下的向量或点$V(v_{x}, v_{y}, v_{z})$变换到基$E^{'}$下的另一个向量或点$V^{'}(v_{x}^{'}, v_{y}^{'}, v_{z}^{'})$
+\par
+一是计算基$E^{'}$下的向量或点$V(v_{x}, v_{y}, v_{z})$在基$E$下的坐标$(v_{x}^{'}, v_{y}^{'}, v_{z}^{'})$
+\par
+按照这样的推理，就可以得到绕$X$轴和$Y$轴的旋转矩阵，
+\begin{gather*}
+    R_{X} = 
+    \begin{bmatrix}
+        1 & 0 & 0 \\
+        0 & cos\theta & -sin\theta \\
+        0 & sin\theta & cos\theta 
+    \end{bmatrix},  
+    R_{Y} = 
+    \begin{bmatrix}
+        cos\theta & 0 & sin\theta \\
+        0 & 1 & 0 \\
+        -sin\theta & 0 & cos\theta 
+    \end{bmatrix}
+\end{gather*}
+
+\par
+一个旋转变换可以拆分为分别绕三个轴旋转的旋转矩阵的乘积，这三个角度叫做欧拉角(分别为Roll、Yaw、Pitch)，因为矩阵不满足交换律，不同的乘法顺序
+会得到不同的结果。
+\begin{gather*}
+    V^{'T} = M_{R} \ast V^{T} = R_{Y}R_{X}R_{Z} \ast V^{T}
+\end{gather*}
+上面的顺序是先绕世界坐标Z轴旋转，再绕世界坐标X轴旋转，最后绕世界坐标Y轴旋转。其中$M_{R} \ast V^{T}$表示$V^{T}$绕
+世界坐标轴的一个旋转轴旋转。
+\par 
+也可以从另外一个角度来，从局部坐标系变换的角度来看待上面式子，就是先绕$V^{T}$所在的局部坐标系的Y轴旋转，再绕旋转后的局部坐标系
+X轴旋转，最后绕当前局部坐标的Z轴旋转。
+\par 
+旋转矩阵是正交矩阵，所以它的逆矩阵是它的转置，即
+\begin{gather*}
+    M_{R}^{-1} = M_{R}^{T}
+\end{gather*}
+
+\subsubsection{绕任意经过原点的轴的旋转}
+
+参考来自《3D Math Primer For Graphics and Game Development》，就是让向量$V$绕向量$n$旋转$\theta$角，得到向量$V^{'}$。
+
+\paragraph{可将$V$投影到一个和$n$垂直的平面上，得到向量$V_{\perp}$，在这个平面上，将它绕$n$旋转$\theta$角，得到新的向量$V_{\perp}^{'}$,
+连接原向量$V$的原点和$V_{\perp}^{'}$得到的就是向量$V^{'}$，现在就是来求解它。}
+
+\par
+向量$V$投影到垂直$n$的平面，有
+\begin{equation*}
+    \begin{split}
+        V = V_{\parallel} + V_{\perp},
+        V_{\parallel} = (V \cdot n)n, \\
+        \Rightarrow V_{\perp} = V - V_{\parallel} = V - (V \cdot n)n
+    \end{split} 
+\end{equation*}
+在投影平面，还存在一个与$n$和$V_{\perp}$都垂直的向量$\omega$
+\begin{equation*}
+    \begin{split}
+        \omega &= n \times V_{\perp} \\
+        &= n \times (V - V_{\parallel}) \\
+        &= n \times V - n \times V_{\parallel} \\
+        &= n \times V - 0 \\
+        &= n \times V
+    \end{split}
+\end{equation*}
+于是可以推得
+\begin{equation*}
+    \begin{split}
+        V_{\perp}^{'} &= V_{\perp}cos\theta + \omega sin\theta, \\
+        &= (V - (V \cdot n)n)cos\theta + (n \times V)sin\theta, \\
+        \Rightarrow V^{'} &= V_{\parallel} + V_{\perp} \\
+        &= (V \cdot n)n + (V - (V \cdot n)n)cos\theta + (n \times V)sin\theta \\
+        &= Vcos\theta + (V \cdot n)n(1 - cos\theta) + (n \times V)sin\theta
+    \end{split} 
+\end{equation*}
+利用上面的公式，可以分别求出对三个坐标轴变换后的基向量，比如X轴变换得到
+\begin{equation*}
+    \begin{split}
+        X^{'} &= \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} cos\theta + (\begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} \cdot \begin{bmatrix} n_{x} \\ n_{y} \\ n_{z} \end{bmatrix}) \begin{bmatrix} n_{x} \\ n_{y} \\ n_{z} \end{bmatrix} (1 - cos\theta) + (\begin{bmatrix} n_{x} \\ n_{y} \\ n_{z} \end{bmatrix} \times \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}) sin\theta \\
+        &= \begin{bmatrix} cos\theta \\ 0 \\ 0 \end{bmatrix} + n_{x} \begin{bmatrix} n_{x} \\ n_{y} \\ n_{z} \end{bmatrix} (1 - cos\theta) + \begin{bmatrix} 0 \\ n_{z} \\ -n_{y} \end{bmatrix} sin\theta \\
+        &= \begin{bmatrix} cos\theta \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} n_{x}^{2} \\ n_{x}n_{y} \\ n_{x}n_{z} \end{bmatrix} (1 - cos\theta) + \begin{bmatrix} 0 \\ n_{z} \\ -n_{y} \end{bmatrix} sin\theta \\
+        &= \begin{bmatrix} n_{x}^{2}(1 - cos\theta) + cos\theta \\ n_{x}n_{y}(1 - cos\theta) + n_{z}sin\theta \\ n_{x}n_{z}(1 - cos\theta) - n_{y}sin\theta \end{bmatrix} 
+    \end{split}
+\end{equation*}
+同理可得
+\begin{equation*}
+    \begin{split}
+        Y^{'} = \begin{bmatrix} n_{x}n_{y}(1 - cos\theta) - n_{z}sin\theta \\ n_{y}^{2}(1 - cos\theta) + cos\theta \\ n_{y}n_{z}(1 - cos\theta) - n_{x}sin\theta \end{bmatrix},
+        Z^{'} = \begin{bmatrix} n_{x}n_{z}(1 - cos\theta) + n_{y}sin\theta \\ n_{y}n_{z}(1 - cos\theta) - n_{x}sin\theta \\ n_{z}^{2}(1 - cos\theta) + cos\theta \end{bmatrix},
+    \end{split}
+\end{equation*}
+于是将三个变换后的基向量作为列向量构成矩阵就是绕任意过原点的轴的旋转矩阵
+\begin{equation*}
+    \begin{split}
+        R(n, \theta) &= \begin{bmatrix} X^{'} & Y^{'} & Z^{'} \end{bmatrix} \\
+        &= \begin{bmatrix} 
+            n_{x}^{2}(1 - cos\theta) + cos\theta & n_{x}n_{y}(1 - cos\theta) - n_{z}sin\theta & n_{x}n_{z}(1 - cos\theta) + n_{y}sin\theta \\ 
+            n_{x}n_{y}(1 - cos\theta) + n_{z}sin\theta & n_{y}^{2}(1 - cos\theta) + cos\theta & n_{y}n_{z}(1 - cos\theta) - n_{x}sin\theta \\ 
+            n_{x}n_{z}(1 - cos\theta) - n_{y}sin\theta & n_{y}n_{z}(1 - cos\theta) - n_{x}sin\theta & n_{z}^{2}(1 - cos\theta) + cos\theta 
+        \end{bmatrix}
+    \end{split}
+\end{equation*}
