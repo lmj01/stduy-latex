@@ -23,6 +23,7 @@ a.out
 *.ilg
 *.ind
 
+renderer/renderer.synctex(busy)
 zhangyu1000/*
 
 
