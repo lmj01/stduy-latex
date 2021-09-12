@@ -2,15 +2,19 @@
 
 实时且更复杂的渲染效果是在场景几何体上借助多次渲染来达到效果，这就是Rendering Pass的核心
 
-\subsection{定义}
+\subsection{它是什么呢？}
 
-在OpenGL时代，一个rendering pass就是走完一遍渲染管线，从VS(Vertex Shader)到TS，
+它是一个模糊的概念，根具体的技术方案联系在一起。在OpenGL时代，一个rendering pass就是走完一遍渲染管线，从VS(Vertex Shader)到TS，
 到GS， 到光栅化Rasterize，最后到FS中，得到的这一帧数据，是放在FBO或RT中，作为输入供
-后面的pass使用
+后面的pass使用。从一个rendering pass应该是一个RT来理解，与功能的需求相对应起来，是比较清晰的。
 
 \par
-在下一代图像API中，Vulkan把这些概念抽象为了具体的类，使渲染的代码结构更加清晰。
+RT与MRT，Tech
 
+\par
+在下一代图像API中，Vulkan把这些概念抽象为了具体的实体对象，使渲染的代码结构更加清晰，是因为当前
+所有的GPU都在向tile-based，RenderPass的含义也是存在差异的，因为tile-based的原因，shader是隔离的
+，所有的shader都是针对具体的像素范围，不能依赖邻居的shader值。\cite{gdc2020Arm}
 
 \subsection{Refection Mapping}
 反射映射是multipass最简单的例子，让一个被渲染对象被镜面化，并反射出场景中其他对象。

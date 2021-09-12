@@ -138,114 +138,6 @@ $$
 normal_xyz = 2 \times rgb - 1
 $$
 
-\section{Bump Map}
-
-为增加表面法向量细节，如一个平面法向量处处相同，即时使用纹理，光照效果仍然不够真实，可以增加扰动表面面皮的法向量，
-从而形成比较真实的效果。
-
-纹理贴图存储的是颜色值，而Bump Map存储的是凹凸数据，通常是高度值。
-Bump Map是Phong Shading的一项扩展，因为表面法线用来计算顶点的光亮，而Bump Map就是为了影响法线的改变，最终影响颜色值。
-所以算是一种负责光方向的纹理映射，不同的凹凸数据，使用不同的方法来影响法线。
-
-\begin{itemize}
-    \item \text{Emboss Bump Map}
-    \item \text{DOT3 Bumap Map}
-\end{itemize}
-
-\subsection{Normal Map}
-
-是实时渲染中，通常使用凹凸贴图的变种法线贴图，bluish texture偏蓝色纹理，法线贴图在纹理的每个像素中存储一个颜色。
-有两种方法生成法线贴图
-\paragraph{灰度图}
-预先计算每个像素与其垂直和水平相邻像素之间的差别，将两个结果数字（导数）转换为单位法线并存储为颜色
-\paragraph{精模烘焙法线}
-把纹理的每个像素与精模的表面位置结合起来，将其结果编码为法线存储为颜色值
-
-为使生成的纹理可以在任意旋转下均反复使用，存储的法线必须在\textbf{切线空间}中，切线空间由三个向量normal法线，tangent切线，binormal副法线组成。
-切线空间决定了表面的朝向。
-
-切线空间的映射依赖物体的UV纹理，因为UV纹理中的决定世界空间中的切线空间的两个向量，切线和副法线。
-生成较好的UV纹理在切线空间中不穿帮是比较困难和耗时的。
-
-\begin{center}
-    \includegraphics[width=0.8\textwidth]{images/normal_map_tnb.png}
-    \includegraphics[width=0.8\textwidth]{images/normal_map_tnb_in_object_space.png}
-\end{center}
-假设三角形的三个顶点为$V_{0},V_{1},V_{2}$,对应的纹理坐标为$(u_{0},v_{0}),(u_{1},v_{1}),(u_{2},v_{2})$
-
-\begin{gather*}
-    \because \overrightarrow{e_{0}} = V_{1} - V_{0} \\ 
-    \overrightarrow{e_{1}} = V_{2} - V_{0} \\ 
-    \therefore (\Delta u_{0},\Delta v_{0}) = (u_{1} - u_{0}, v_{1} - v{0}) \\ 
-    (\Delta u_{1}, \Delta v_{1}) = (u_{2} - u_{0}, v_{2} - v_{0}) \\ 
-    \because \overrightarrow{e_{0}} = \Delta u_{0} \ast \overrightarrow{T} + \Delta v_{0} \ast \overrightarrow{B} \\
-    \overrightarrow{e_{1}} = \Delta u_{1} \ast \overrightarrow{T} + \Delta v_{1} \ast \overrightarrow{B} \\
-    \therefore \begin{bmatrix}
-        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
-        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
-    \end{bmatrix} = \begin{bmatrix}
-        \Delta u_{0} & \Delta v_{0} \\ 
-        \Delta u_{1} & \Delta v_{1}
-    \end{bmatrix} \begin{bmatrix}
-        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
-        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
-    \end{bmatrix} \\ 
-    \begin{bmatrix}
-        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
-        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
-    \end{bmatrix} = \begin{bmatrix}
-        \Delta u_{0} & \Delta v_{0} \\ 
-        \Delta u_{1} & \Delta v_{1}
-    \end{bmatrix}^{-1} \begin{bmatrix}
-        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
-        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
-    \end{bmatrix} \\ 
-    \because  \begin{bmatrix}
-        \Delta u_{0} & \Delta v_{0} \\ 
-        \Delta u_{1} & \Delta v_{1}
-    \end{bmatrix}^{-1} = \frac{1}{\Delta u_{0} \Delta v_{1} - \Delta v_{0} \Delta u_{1}} \begin{bmatrix}
-        \Delta v_{1} & -\Delta v_{0} \\ 
-        -\Delta u_{1} & \Delta u_{0}
-    \end{bmatrix} \\ 
-    \therefore \begin{bmatrix}
-        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
-        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z  
-    \end{bmatrix} = \frac{1}{\Delta u_{0} \Delta v_{1} - \Delta v_{0} \Delta u_{1}} \begin{bmatrix}
-        \Delta v_{1} & -\Delta v_{0} \\ 
-        -\Delta u_{1} & \Delta u_{0}
-    \end{bmatrix} \begin{bmatrix}
-        \overrightarrow{e_{0}}.x & \overrightarrow{e_{0}}.y & \overrightarrow{e_{0}}.z \\ 
-        \overrightarrow{e_{1}}.x & \overrightarrow{e_{1}}.y & \overrightarrow{e_{1}}.z  
-    \end{bmatrix} 
-\end{gather*}
-通常直接传入每个顶点的法线和切线，可得到每个顶点在世界坐标系中的法线坐标和切线坐标值。N为顶点在世界坐标的法线，
-则切线$T^{'} = T - (N \cdot T)N $,这样保证N与$ T^{'} $是正交的，则$B=N \times T^{'}$. 得到切线坐标系中的坐标值，
-可以构造一个矩阵，将切线空间中的法线坐标变换到世界坐标，以得到法线坐标。
-\begin{gather*}
-    \begin{bmatrix}
-        \overrightarrow{T}.x & \overrightarrow{T}.y & \overrightarrow{T}.z \\ 
-        \overrightarrow{B}.x & \overrightarrow{B}.y & \overrightarrow{B}.z \\ 
-        \overrightarrow{N}.x & \overrightarrow{N}.y & \overrightarrow{N}.z 
-    \end{bmatrix}
-\end{gather*}
-
-\subsection{Height Map}
-高度图是存储高度信息的数据，通常计算XY方向上的倾斜度
-
-\begin{gather*}
-    x_gradient = pixel(x-1,y) - pixel(x+1,y) \\
-    y_gradient = pixel(x,y-1) - pixel(x,y+1) \\
-    normalNew = normal + (U * x_gradient) + (V * y_gradient)
-\end{gather*}
-
-在的Bump Map\cite{CGPP3ed}中，有一个公式更加通用
-
-\begin{align*}
-    n^{'} = S(n + rt_{1} + gt_{2})
-\end{align*}
-
-它描述了两个方向上向量对法线的影响
-
 \section{Texture Sampling}
 
 前面说了纹理映射，如果是一一对应很好理解，找到对应的就行了，但现实中更复杂的是对特别小resolution低，
@@ -280,3 +172,4 @@ sRGB/RGB color space, linear/gamma space,
 
 设计师的眼睛与屏幕的显式因素
 
+\input{subpart/section.normalmap.tex}

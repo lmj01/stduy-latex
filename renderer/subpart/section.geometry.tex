@@ -1,0 +1,44 @@
+\section{Geometry}
+
+\subsection{Euclidean Geometry}
+欧几里得几何学，是对空间物体的刻画，是基于某个维度上的内积inner product。对于空间中的点和线，感兴趣的是它们的距离、角度
+等属性，可以通过求其内积获得。
+
+不遵从欧几里得公理系统的几何学，叫做非欧几里得几何学non-Euclidean Geometry
+
+拓扑学Topology是研究几何体连续形变中保持不变的性质。连续的变换最后都能变成一样的两个物体，称为同胚Homeomorphism。
+
+形变是柔软的，像流动的液体一样，这就是流形manifold的概念。一个d维的流形是一个其内任意点局部同胚于欧式空间$R^d$的d维空间。
+球面就是一个嵌入三维空间中的二维流形，因为可以把球面任意点周围(局部小区域)看作是一个二维欧式空间。
+反过来就是将低维欧式空间在更高维空间进行扭曲就构成了一个流形。
+
+\subsection{manifold}
+
+流形，一般指几何对象的总称，包括各种维数的曲线曲面等。流形学把一组在高维空间中的数据在低维空间中重新表示。
+
+对于描述流形上的点需要坐标，而流形本身是没有坐标的，为了表示流形上的点，需要把流形放入外围空间ambient space
+中，使用外围空间坐标来表示。如$R^3$中的球面是个2维的曲面，但球面上的点使用外围$R^3$空间中的坐标来表示。
+流形学习可粗略概括为给出$R^3$中的表示，在保持球面上的某些几何性质的条件下，找出一组对应的内蕴坐标intrinsic coordinate 
+来表示，它显然是一个二维表达，这个过程也叫做参数化parameterization。
+
+\paragraph{intrinsic}
+低维表示也叫做内蕴特征
+
+\paragraph{observation}
+高维叫做观察维数，也叫自然坐标。
+
+\subsection{几何映射}
+几何映射是计算机图形学、几何处理与建模领域的基本工具，
+
+\begin{itemize}
+    \item \text{Continuous连续性，不能有任何函数值突变}
+    \item \text{Bijective双射性，所有网格顶点与三角面片内部点都一一映射，不能有面片自相交}
+    \item \text{Low distortion低扭曲，尽可能少且只在必须扭曲的地方发生扭曲，求解上一般用最小化某个能量函数来实现}
+\end{itemize}
+前两个性质同时满足时，称这个几何映射是同坯(surface homeomorphism)。
+
+\paragraph{genus亏格}
+
+\paragraph{开网格与闭网格}
+
+
