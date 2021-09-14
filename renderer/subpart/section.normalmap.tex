@@ -17,6 +17,7 @@ Bump Map是Phong Shading的一项扩展，表面法线用来计算顶点的光�
 凹凸贴图通常保存为RGB纹理，纹理每个通道分别存储标准化方向向量的x、y、z轴的值，作为颜色数据，可以像其他的纹理一样，
 进行采样插值，不管凹凸贴图分辨率大小，都会存在插值并对每个fragment法线产生作用
 
+
 \subsection{Height Map}
 高度图是存储高度信息的数据，通常计算XY方向上的倾斜度
 \begin{gather*}
@@ -56,7 +57,21 @@ Bump Map是Phong Shading的一项扩展，表面法线用来计算顶点的光�
     \end{bmatrix}
 \end{gather*}
 把凹凸贴图中获取到的图像法线乘以TBN矩阵，就从切线空间转换到世界空间中，就可以在世界空间中利用得到的凹凸贴图的法线进行光照计算了。
-
+\par
+注意：$T^{'}$求解时的公式，是使用Gram-Schmidt(施密特正交化)算法来校正
+\begin{center}
+    \includegraphics[width=0.8\textwidth]{images/gram-schmidt.png}
+\end{center}
+如图，将设两个不相关向量a、b，需要得到新的正交基$\hat{a}$、$\hat{b}$，从图中直观看到e与a正交，
+求解e就是要的结果
+\begin{gather*}
+    \hat{e} = b - p = b - \frac{a^{T}b}{a^{T}a}a
+\end{gather*}
+当引入第三个不相关的向量c时，前面两个正交基求解不变，第三个分正交分量c为
+\begin{gather*}
+    \hat{c} = c - \frac{a^{T}c}{a^{T}a}a - \frac{b^{T}c}{b^{T}b}b
+\end{gather*}
+这样得到的向量就是最终的正交基，这个可以推广到N维向量。
 \par
 通过图示来解释一下求解的过程
 \begin{center}
@@ -112,13 +127,20 @@ Bump Map是Phong Shading的一项扩展，表面法线用来计算顶点的光�
     \end{bmatrix} 
 \end{gather*}
 根据以上公式就可以得到切线T和副法线B。这样就可以在vs中传入normal和tangent，并计算得到binormal，并把这三个向量
-标准归一化后传给fs，构造TBN矩阵后乘以从bump map中拿到的法线相乘就是世界坐标的法线了，就可以直接参与光照计算了，
-这样的思路是符合光照计算的，思路也清晰。
-
+标准归一化后传给fs，构造TBN矩阵后乘以从bump map中拿到的法线相乘就是世界坐标的法线了，就可以直接参与光照计算了。
 \par
-另一种方法就是把所有的计算都放在切线空间中，这需要把光线向量ray和视图向量view转换到切线空间中，转换的公式是
+简单地说一下光照中素级法线的用法，每个像素的颜色outColor = baseColor(ambient + diffuse ) + specular。用到像素法线的是
+diffuse和specular，normal、view、halfViewAndLight三者的关系，就是夹角cos因子，要保证normal与view和halfViewAndLight是在
+同一坐标系下且标准归一化的向量，夹角cos就是一定的。也就是把所有的计算都放在切线空间中，这需要把光线向量ray和视图向量view转换到
+切线空间中，转换的公式是
 \begin{gather*}
     \frac{view}{ray} \times TBN^{-1}
 \end{gather*}
-TBN矩阵的逆矩阵就是转置矩阵，因为构造TBN的都是标准归一化的正交矩阵，这种方法效率更高，因为$\frac{view}{ray}$
-在vs中进行转换即可，相比在fs中进行凹凸贴图法线要进行逐像素的转换相比，效率高很多。
+TBN矩阵的逆矩阵就是转置矩阵，因为构造TBN的都是标准归一化的正交矩阵，因为$\frac{view}{ray}$在vs中进行转换即可。
+
+\par
+这两种方法消耗都是2N次变换。追问一下像素切线与顶点切线空间的关系，下图是OpenGL中切线空间的位置：
+\begin{center}
+    \includegraphics[width=0.8\textwidth,angle=270]{images/ShaderSpace.png}
+\end{center}
+TBN矩阵是从切线空间到模型空间的变换矩阵，其中的TBN
